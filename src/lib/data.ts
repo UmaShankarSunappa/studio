@@ -48,7 +48,7 @@ const educationLevels = ["Bachelor's Degree", "Master's Degree", "High School Di
 const businessExperience = ["0-2 years", "2-5 years", "5-10 years", "10+ years", "No experience"];
 const investmentCapacities = [50000, 75000, 100000, 150000, 200000];
 
-export const leads: Lead[] = Array.from({ length: 50 }, (_, i) => {
+export const leads: Lead[] = Array.from({ length: 150 }, (_, i) => {
   const name = names[i % names.length];
   const cityInfo = cities[i % cities.length];
   const dateAdded = new Date(new Date().setDate(new Date().getDate() - i * 2));
