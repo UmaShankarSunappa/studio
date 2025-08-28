@@ -269,7 +269,8 @@ export default function LeadsPage() {
                 <tbody>
                   {filteredLeads.map((lead) => {
                     const SourceIcon = sourceIcons[lead.source];
-                    const canBeAssigned = lead.status !== 'New' && lead.status !== 'WhatsApp - Sent' && !lead.assignedUser;
+                    const assignableStatuses: LeadStatus[] = ['WhatsApp - Delivery Failed', 'Form 2 - Submitted', 'Form 2 - No Response', 'Form 2 - Pending'];
+                    const canBeAssigned = assignableStatuses.includes(lead.status) && !lead.assignedUser;
                     
                     const assignableEvaluators = getAssignableEvaluators(lead);
 
