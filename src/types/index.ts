@@ -16,6 +16,23 @@ export type User = {
   avatar: string;
 };
 
+export type StatusHistory = {
+  status: LeadStatus;
+  date: Date;
+};
+
+export type Interaction = {
+  type: string;
+  date: Date;
+  notes: string;
+};
+
+export type Note = {
+  text: string;
+  date: Date;
+  user: User;
+};
+
 export type Lead = {
   id: string;
   name: string;
@@ -27,4 +44,12 @@ export type Lead = {
   assignedUser?: User;
   phone: string;
   email: string;
+  // Form 2 Data
+  education: string;
+  previousExperience: string;
+  investmentCapacity: number;
+  // Logs
+  statusHistory: StatusHistory[];
+  interactions: Interaction[];
+  notes: Note[];
 };

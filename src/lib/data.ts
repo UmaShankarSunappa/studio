@@ -1,4 +1,4 @@
-import type { User, Lead, LeadSource, LeadStatus } from '@/types';
+import type { User, Lead, LeadSource, LeadStatus, Note } from '@/types';
 
 export const currentUser: User = {
   id: 'user-1',
@@ -33,16 +33,40 @@ const names = [
   "Geeta Singh", "Anil Patel", "Rekha Sharma", "Sanjay Mehta", "Anita Desai"
 ];
 
+const educationLevels = ["Bachelor's Degree", "Master's Degree", "High School Diploma", "PhD", "MBA"];
+const businessExperience = ["0-2 years", "2-5 years", "5-10 years", "10+ years", "No experience"];
+const investmentCapacities = [50000, 75000, 100000, 150000, 200000];
+
 export const leads: Lead[] = Array.from({ length: 50 }, (_, i) => {
   const name = names[i % names.length];
   const cityInfo = cities[i % cities.length];
-  const status = leadStatuses[i % leadStatuses.length];
+  const dateAdded = new Date(new Date().setDate(new Date().getDate() - i * 2));
+  const currentStatus = leadStatuses[i % leadStatuses.length];
   
   let assignedUser: User | undefined = undefined;
-  if (status !== "New" && status !== "WhatsApp - Sent" && i % 3 !== 0) {
+  if (currentStatus !== "New" && currentStatus !== "WhatsApp - Sent" && i % 3 !== 0) {
     assignedUser = users[i % users.length];
   }
-  
+
+  const statusHistory = [{ status: "New" as LeadStatus, date: new Date(dateAdded.getTime() - 86400000) }];
+  if (currentStatus !== "New") {
+    statusHistory.push({ status: currentStatus, date: dateAdded });
+  }
+
+  const interactions = [
+    { type: "Initial Inquiry", date: new Date(dateAdded.getTime() - 172800000), notes: "Prospect inquired via website form about franchise opportunities." },
+    { type: "WhatsApp Message", date: dateAdded, notes: "Sent initial WhatsApp message with brochure." }
+  ];
+
+  const notes: Note[] = [];
+  if (i % 5 === 0) {
+      notes.push({
+          text: "Follow up next week regarding Form-2 submission.",
+          date: new Date(),
+          user: users[i % users.length]
+      })
+  }
+
   return {
     id: `lead-${i + 1}`,
     name: name,
@@ -51,8 +75,15 @@ export const leads: Lead[] = Array.from({ length: 50 }, (_, i) => {
     city: cityInfo.name,
     state: cityInfo.state,
     source: leadSources[i % leadSources.length],
-    status: status,
-    dateAdded: new Date(new Date().setDate(new Date().getDate() - i * 2)),
+    status: currentStatus,
+    dateAdded: dateAdded,
     assignedUser: assignedUser,
+    // New fields
+    education: educationLevels[i % educationLevels.length],
+    previousExperience: businessExperience[i % businessExperience.length],
+    investmentCapacity: investmentCapacities[i % investmentCapacities.length],
+    statusHistory: statusHistory,
+    interactions: interactions,
+    notes: notes,
   };
 });
