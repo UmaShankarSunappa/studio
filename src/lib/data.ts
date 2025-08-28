@@ -14,9 +14,21 @@ export const allUsers: User[] = [
 
 
 export const leadStatuses: LeadStatus[] = [
-  "New", "WhatsApp - Sent", "WhatsApp - Delivery Failed",
-  "Form 2 - Pending", "Form 2 - Submitted", "Form 2 - No Response",
-  "Follow up", "Converted", "Not Interested"
+    "New",
+    "WhatsApp - Sent",
+    "WhatsApp - Delivery Failed",
+    "Form 2 - Pending",
+    "Form 2 - Submitted",
+    "Form 2 - No Response",
+    "In Discussion",
+    "Document Shared",
+    "Follow-up Required",
+    "Site Visit Scheduled",
+    "In Evaluation",
+    "Negotiation Stage",
+    "On Hold",
+    "Converted",
+    "Not Interested"
 ];
 
 const leadSources: LeadSource[] = ["Newspaper", "YouTube", "Field Marketing", "Website", "Referral"];

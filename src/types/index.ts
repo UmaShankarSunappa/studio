@@ -7,7 +7,13 @@ export type LeadStatus =
   | "Form 2 - Pending"
   | "Form 2 - Submitted"
   | "Form 2 - No Response"
-  | "Follow up"
+  | "In Discussion"
+  | "Document Shared"
+  | "Follow-up Required"
+  | "Site Visit Scheduled"
+  | "In Evaluation"
+  | "Negotiation Stage"
+  | "On Hold"
   | "Converted"
   | "Not Interested";
 
