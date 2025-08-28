@@ -15,7 +15,7 @@ export const users: User[] = [
 export const leadStatuses: LeadStatus[] = [
   "New", "WhatsApp - Sent", "WhatsApp - Delivery Failed",
   "Form 2 - Pending", "Form 2 - Submitted", "Form 2 - No Response",
-  "Sales - Follow-up", "Converted"
+  "Follow up", "Converted", "Not Interested"
 ];
 
 const leadSources: LeadSource[] = ["Newspaper", "YouTube", "Field Marketing", "Website"];
@@ -41,7 +41,10 @@ export const leads: Lead[] = Array.from({ length: 50 }, (_, i) => {
   const name = names[i % names.length];
   const cityInfo = cities[i % cities.length];
   const dateAdded = new Date(new Date().setDate(new Date().getDate() - i * 2));
-  const currentStatus = leadStatuses[i % leadStatuses.length];
+  
+  // Exclude "Not Interested" from random generation for existing leads
+  const assignableStatuses = leadStatuses.filter(s => s !== "Not Interested");
+  const currentStatus = assignableStatuses[i % assignableStatuses.length];
   
   let assignedUser: User | undefined = undefined;
   if (currentStatus !== "New" && currentStatus !== "WhatsApp - Sent" && i % 3 !== 0) {

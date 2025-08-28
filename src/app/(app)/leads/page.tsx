@@ -35,8 +35,9 @@ const statusColors: Record<LeadStatus, string> = {
   "Form 2 - Pending": "bg-purple-100 text-purple-800",
   "Form 2 - Submitted": "bg-indigo-100 text-indigo-800",
   "Form 2 - No Response": "bg-orange-100 text-orange-800",
-  "Sales - Follow-up": "bg-teal-100 text-teal-800",
+  "Follow up": "bg-teal-100 text-teal-800",
   "Converted": "bg-emerald-100 text-emerald-800",
+  "Not Interested": "bg-gray-100 text-gray-800",
 };
 
 const sourceIcons: Record<LeadSource, React.ElementType> = {
@@ -88,22 +89,47 @@ export default function LeadsPage() {
     setSelectedLead(prev => prev ? { ...prev, notes: [...prev.notes, newNote] } : null);
   };
 
-  const handleUpdateStatus = (leadId: string, status: LeadStatus) => {
+  const handleUpdateStatus = (leadId: string, status: LeadStatus, remarks?: string) => {
     const newStatusHistoryEntry = { status, date: new Date() };
-    setLeads(prevLeads => prevLeads.map(lead => 
-        lead.id === leadId
-          ? { 
+    
+    setLeads(prevLeads => prevLeads.map(lead => {
+        if (lead.id === leadId) {
+            const updatedLead = { 
               ...lead, 
               status,
               statusHistory: [...lead.statusHistory, newStatusHistoryEntry]
+            };
+            if (remarks) {
+                const newNote = {
+                    text: `Status changed to "Not Interested". Remarks: ${remarks}`,
+                    date: new Date(),
+                    user: currentUser
+                };
+                updatedLead.notes = [...updatedLead.notes, newNote];
             }
-          : lead
-    ));
-    setSelectedLead(prev => prev ? { 
-        ...prev, 
-        status,
-        statusHistory: [...prev.statusHistory, newStatusHistoryEntry]
-    } : null);
+            return updatedLead;
+        }
+        return lead;
+    }));
+
+    setSelectedLead(prev => {
+        if (!prev) return null;
+        const updatedLead = {
+            ...prev,
+            status,
+            statusHistory: [...prev.statusHistory, newStatusHistoryEntry]
+        };
+        if (remarks) {
+             const newNote = {
+                text: `Status changed to "Not Interested". Remarks: ${remarks}`,
+                date: new Date(),
+                user: currentUser
+            };
+            updatedLead.notes = [...updatedLead.notes, newNote];
+        }
+        return updatedLead;
+    });
+
     toast({
         title: "Status Updated",
         description: `Lead status has been updated to "${status}".`

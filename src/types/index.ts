@@ -7,8 +7,9 @@ export type LeadStatus =
   | "Form 2 - Pending"
   | "Form 2 - Submitted"
   | "Form 2 - No Response"
-  | "Sales - Follow-up"
-  | "Converted";
+  | "Follow up"
+  | "Converted"
+  | "Not Interested";
 
 export type User = {
   id: string;

@@ -28,7 +28,7 @@ const sourceChartConfig: ChartConfig = {
 };
 
 // Funnel Analysis Data
-const funnelStages: LeadStatus[] = ["New", "Form 2 - Submitted", "Sales - Follow-up", "Converted"];
+const funnelStages: LeadStatus[] = ["New", "Form 2 - Submitted", "Follow up", "Converted"];
 const funnelData = funnelStages.map(stage => ({
     name: stage,
     value: leads.filter(l => funnelStages.slice(funnelStages.indexOf(stage)).includes(l.status)).length,
