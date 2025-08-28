@@ -57,13 +57,29 @@ export const leads: Lead[] = Array.from({ length: 150 }, (_, i) => {
   const currentStatus = assignableStatuses[i % assignableStatuses.length];
   
   let assignedUser: User | undefined = undefined;
-  if (currentStatus !== "New" && currentStatus !== "WhatsApp - Sent" && i % 3 !== 0) {
-    // Assign to an evaluator from the same state
-    const evaluatorsInState = allUsers.filter(u => u.role === 'Evaluator' && u.state === cityInfo.state);
+
+  const statusesRequiringAssignment: LeadStatus[] = ['WhatsApp - Delivery Failed', 'Form 2 - Submitted', 'Form 2 - No Response', 'Form 2 - Pending'];
+  const initialStatuses: LeadStatus[] = ['New', 'WhatsApp - Sent'];
+  
+  const evaluatorsInState = allUsers.filter(u => u.role === 'Evaluator' && u.state === cityInfo.state);
+
+  // If status is past initial stages and NOT one that shows the "Assign" button, it should be pre-assigned.
+  if (!initialStatuses.includes(currentStatus) && !statusesRequiringAssignment.includes(currentStatus)) {
     if (evaluatorsInState.length > 0) {
         assignedUser = evaluatorsInState[i % evaluatorsInState.length];
     }
+  } else if (statusesRequiringAssignment.includes(currentStatus)) {
+    // For statuses that should show the "Assign" button, let's make some of them unassigned.
+    if (i % 3 !== 0) {
+        // Leave it unassigned (assignedUser remains undefined)
+    } else {
+        // Pre-assign some of them anyway for variety
+        if (evaluatorsInState.length > 0) {
+            assignedUser = evaluatorsInState[i % evaluatorsInState.length];
+        }
+    }
   }
+  // For initialStatuses, assignedUser remains undefined.
 
   const statusHistory = [{ status: "New" as LeadStatus, date: new Date(dateAdded.getTime() - 86400000) }];
   if (currentStatus !== "New") {
