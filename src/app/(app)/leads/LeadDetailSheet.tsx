@@ -42,7 +42,7 @@ import type { Lead, LeadStatus } from '@/types';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { currentUser } from '@/lib/data';
+import { useAuth } from '@/hooks/use-auth';
 import {
   Select,
   SelectContent,
@@ -68,6 +68,7 @@ export function LeadDetailSheet({
   onAddNote,
   onUpdateStatus,
 }: LeadDetailSheetProps) {
+  const { user: currentUser } = useAuth();
   const [note, setNote] = React.useState('');
   const [isRemarksDialogOpen, setIsRemarksDialogOpen] = React.useState(false);
   const [remarks, setRemarks] = React.useState("");
@@ -96,7 +97,7 @@ export function LeadDetailSheet({
     }
   };
 
-  if (!lead) return null;
+  if (!lead || !currentUser) return null;
 
   const isAssignedToCurrentUser = lead.assignedUser?.id === currentUser.id;
 
@@ -239,7 +240,7 @@ export function LeadDetailSheet({
                             <div>
                               <p className="font-medium">{history.status}</p>
                               <p className="text-sm text-muted-foreground">
-                                {format(history.date, 'MMM d, yyyy h:mm a')}
+                                {format(new Date(history.date), 'MMM d, yyyy h:mm a')}
                               </p>
                             </div>
                           </li>
@@ -260,7 +261,7 @@ export function LeadDetailSheet({
                         <div key={index} className="text-sm">
                           <p className="font-medium">{interaction.type}</p>
                           <p className="text-xs text-muted-foreground mb-1">
-                            {format(interaction.date, 'MMM d, yyyy h:mm a')}
+                            {format(new Date(interaction.date), 'MMM d, yyyy h:mm a')}
                           </p>
                           <p className="text-muted-foreground bg-secondary p-2 rounded-md">
                             {interaction.notes}
@@ -283,7 +284,7 @@ export function LeadDetailSheet({
                           <div key={index} className="text-sm bg-secondary p-3 rounded-md">
                             <p className="font-medium">{note.user.name}</p>
                             <p className="text-xs text-muted-foreground mb-1">
-                              {format(note.date, 'MMM d, yyyy h:mm a')}
+                              {format(new Date(note.date), 'MMM d, yyyy h:mm a')}
                             </p>
                             <p className="text-muted-foreground">{note.text}</p>
                           </div>

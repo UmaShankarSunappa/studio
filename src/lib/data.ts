@@ -1,16 +1,13 @@
-import type { User, Lead, LeadSource, LeadStatus, Note } from '@/types';
+import type { User, Lead, LeadSource, LeadStatus, Note, UserRole, UserState } from '@/types';
 
-export const currentUser: User = {
-  id: 'user-1',
-  name: 'Alex Johnson',
-  avatar: 'https://i.pravatar.cc/150?u=user-1',
-};
-
-export const users: User[] = [
-  currentUser,
-  { id: 'user-2', name: 'Maria Garcia', avatar: 'https://i.pravatar.cc/150?u=user-2' },
-  { id: 'user-3', name: 'Chen Wei', avatar: 'https://i.pravatar.cc/150?u=user-3' },
+export const allUsers: User[] = [
+  { id: 'user-1', name: 'Admin User', avatar: 'https://i.pravatar.cc/150?u=user-1', role: 'Admin', state: 'All' },
+  { id: 'user-2', name: 'Telangana Manager', avatar: 'https://i.pravatar.cc/150?u=user-2', role: 'Manager', state: 'Telangana' },
+  { id: 'user-3', name: 'Tamil Nadu Manager', avatar: 'https://i.pravatar.cc/150?u=user-3', role: 'Manager', state: 'Tamil Nadu' },
+  { id: 'user-4', name: 'Telangana Evaluator', avatar: 'https://i.pravatar.cc/150?u=user-4', role: 'Evaluator', state: 'Telangana' },
+  { id: 'user-5', name: 'Tamil Nadu Evaluator', avatar: 'https://i.pravatar.cc/150?u=user-5', role: 'Evaluator', state: 'Tamil Nadu' },
 ];
+
 
 export const leadStatuses: LeadStatus[] = [
   "New", "WhatsApp - Sent", "WhatsApp - Delivery Failed",
@@ -20,11 +17,9 @@ export const leadStatuses: LeadStatus[] = [
 
 const leadSources: LeadSource[] = ["Newspaper", "YouTube", "Field Marketing", "Website", "Referral"];
 const cities = [
-  { name: "Mumbai", state: "Maharashtra" }, { name: "Delhi", state: "Delhi" },
-  { name: "Bangalore", state: "Karnataka" }, { name: "Chennai", state: "Tamil Nadu" },
-  { name: "Kolkata", state: "West Bengal" }, { name: "Hyderabad", state: "Telangana" },
-  { name: "Pune", state: "Maharashtra" }, { name: "Ahmedabad", state: "Gujarat" },
-  { name: "Jaipur", state: "Rajasthan" }, { name: "Lucknow", state: "Uttar Pradesh" }
+  { name: "Hyderabad", state: "Telangana" as const }, { name: "Warangal", state: "Telangana" as const },
+  { name: "Chennai", state: "Tamil Nadu" as const }, { name: "Madurai", state: "Tamil Nadu" as const },
+  { name: "Coimbatore", state: "Tamil Nadu" as const }, { name: "Nizamabad", state: "Telangana" as const }
 ];
 const names = [
   "Rohan Sharma", "Priya Patel", "Amit Singh", "Anjali Mehta", "Vikram Kumar",
@@ -42,13 +37,16 @@ export const leads: Lead[] = Array.from({ length: 50 }, (_, i) => {
   const cityInfo = cities[i % cities.length];
   const dateAdded = new Date(new Date().setDate(new Date().getDate() - i * 2));
   
-  // Exclude "Not Interested" from random generation for existing leads
   const assignableStatuses = leadStatuses.filter(s => s !== "Not Interested");
   const currentStatus = assignableStatuses[i % assignableStatuses.length];
   
   let assignedUser: User | undefined = undefined;
   if (currentStatus !== "New" && currentStatus !== "WhatsApp - Sent" && i % 3 !== 0) {
-    assignedUser = users[i % users.length];
+    // Assign to an evaluator from the same state
+    const evaluatorsInState = allUsers.filter(u => u.role === 'Evaluator' && u.state === cityInfo.state);
+    if (evaluatorsInState.length > 0) {
+        assignedUser = evaluatorsInState[i % evaluatorsInState.length];
+    }
   }
 
   const statusHistory = [{ status: "New" as LeadStatus, date: new Date(dateAdded.getTime() - 86400000) }];
@@ -81,7 +79,6 @@ export const leads: Lead[] = Array.from({ length: 50 }, (_, i) => {
     status: currentStatus,
     dateAdded: dateAdded,
     assignedUser: assignedUser,
-    // New fields
     education: educationLevels[i % educationLevels.length],
     previousExperience: businessExperience[i % businessExperience.length],
     investmentCapacity: investmentCapacities[i % investmentCapacities.length],

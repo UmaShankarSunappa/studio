@@ -11,10 +11,15 @@ export type LeadStatus =
   | "Converted"
   | "Not Interested";
 
+export type UserRole = "Admin" | "Manager" | "Evaluator";
+export type UserState = "Telangana" | "Tamil Nadu" | "All";
+
 export type User = {
   id: string;
   name: string;
   avatar: string;
+  role: UserRole;
+  state: UserState;
 };
 
 export type StatusHistory = {
@@ -38,7 +43,7 @@ export type Lead = {
   id: string;
   name: string;
   city: string;
-  state: string;
+  state: "Telangana" | "Tamil Nadu";
   source: LeadSource;
   status: LeadStatus;
   dateAdded: Date;

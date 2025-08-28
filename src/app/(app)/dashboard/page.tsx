@@ -10,48 +10,79 @@ import {
   type ChartConfig,
 } from "@/components/ui/chart";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { leads, users } from "@/lib/data";
+import { leads as allLeads, allUsers } from "@/lib/data";
 import { LeadSource, LeadStatus } from "@/types";
 import { countBy, toPairs, sortBy, take } from 'lodash';
 import { Badge } from "@/components/ui/badge";
-
-// Source Performance Data
-const sourcePerformanceData = toPairs(countBy(leads, 'source')).map(([name, value]) => ({
-  name: name as LeadSource,
-  leads: value,
-  converted: leads.filter(l => l.source === name && l.status === 'Converted').length
-}));
-
-const sourceChartConfig: ChartConfig = {
-  leads: { label: "Leads", color: "hsl(var(--primary))" },
-  converted: { label: "Converted", color: "hsl(var(--accent))" },
-};
-
-// Funnel Analysis Data
-const funnelStages: LeadStatus[] = ["New", "Form 2 - Submitted", "Follow up", "Converted"];
-const funnelData = funnelStages.map(stage => ({
-    name: stage,
-    value: leads.filter(l => funnelStages.slice(funnelStages.indexOf(stage)).includes(l.status)).length,
-    fill: `hsl(var(--chart-${funnelStages.indexOf(stage) + 1}))`
-}));
-
-// Geographic Distribution Data
-const geoData = sortBy(toPairs(countBy(leads, 'state')), ([, count]) => -count).map(([name, leads]) => ({ name, leads }));
-
-
-// Team Performance Data
-const teamPerformanceData = users.map(user => {
-    const assignedLeads = leads.filter(l => l.assignedUser?.id === user.id);
-    const convertedLeads = assignedLeads.filter(l => l.status === 'Converted').length;
-    return {
-        user,
-        leadsClaimed: assignedLeads.length,
-        conversionRate: assignedLeads.length > 0 ? (convertedLeads / assignedLeads.length) * 100 : 0,
-    }
-});
-
+import { useAuth } from "@/hooks/use-auth";
 
 export default function DashboardPage() {
+  const { user: currentUser } = useAuth();
+  
+  const leads = React.useMemo(() => {
+    if (!currentUser) return [];
+    if (currentUser.role === 'Admin') {
+      return allLeads;
+    }
+    if (currentUser.role === 'Manager') {
+      return allLeads.filter(lead => lead.state === currentUser.state);
+    }
+    if (currentUser.role === 'Evaluator') {
+      return allLeads.filter(lead => lead.assignedUser?.id === currentUser.id);
+    }
+    return [];
+  }, [currentUser]);
+
+  const users = React.useMemo(() => {
+    if (!currentUser) return [];
+    if (currentUser.role === 'Admin') {
+        return allUsers;
+    }
+    if (currentUser.role === 'Manager') {
+        return allUsers.filter(u => u.state === currentUser.state);
+    }
+     if (currentUser.role === 'Evaluator') {
+        return allUsers.filter(u => u.id === currentUser.id);
+    }
+    return [];
+  }, [currentUser])
+
+  // Source Performance Data
+  const sourcePerformanceData = toPairs(countBy(leads, 'source')).map(([name, value]) => ({
+    name: name as LeadSource,
+    leads: value,
+    converted: leads.filter(l => l.source === name && l.status === 'Converted').length
+  }));
+
+  const sourceChartConfig: ChartConfig = {
+    leads: { label: "Leads", color: "hsl(var(--primary))" },
+    converted: { label: "Converted", color: "hsl(var(--accent))" },
+  };
+
+  // Funnel Analysis Data
+  const funnelStages: LeadStatus[] = ["New", "Form 2 - Submitted", "Follow up", "Converted"];
+  const funnelData = funnelStages.map(stage => ({
+      name: stage,
+      value: leads.filter(l => funnelStages.slice(funnelStages.indexOf(stage)).includes(l.status)).length,
+      fill: `hsl(var(--chart-${funnelStages.indexOf(stage) + 1}))`
+  }));
+
+  // Geographic Distribution Data
+  const geoData = sortBy(toPairs(countBy(leads, 'state')), ([, count]) => -count).map(([name, leads]) => ({ name, leads }));
+
+
+  // Team Performance Data
+  const teamPerformanceData = users.filter(u => u.role !== 'Admin').map(user => {
+      const assignedLeads = allLeads.filter(l => l.assignedUser?.id === user.id);
+      const convertedLeads = assignedLeads.filter(l => l.status === 'Converted').length;
+      return {
+          user,
+          leadsClaimed: assignedLeads.length,
+          conversionRate: assignedLeads.length > 0 ? (convertedLeads / assignedLeads.length) * 100 : 0,
+      }
+  });
+
+
   return (
     <div className="space-y-6">
       <header>
@@ -66,7 +97,7 @@ export default function DashboardPage() {
         <Card>
             <CardHeader>
                 <CardTitle>Total Leads</CardTitle>
-                <CardDescription>All leads in the system</CardDescription>
+                <CardDescription>Visible leads in your scope</CardDescription>
             </CardHeader>
             <CardContent>
                 <p className="text-4xl font-bold">{leads.length}</p>
@@ -87,7 +118,9 @@ export default function DashboardPage() {
                 <CardDescription>Overall lead conversion</CardDescription>
             </CardHeader>
             <CardContent>
-                <p className="text-4xl font-bold">{((leads.filter(l => l.status === 'Converted').length / leads.length) * 100).toFixed(1)}%</p>
+                <p className="text-4xl font-bold">
+                    {leads.length > 0 ? ((leads.filter(l => l.status === 'Converted').length / leads.length) * 100).toFixed(1) : '0.0'}%
+                </p>
             </CardContent>
         </Card>
         <Card>

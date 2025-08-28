@@ -1,8 +1,8 @@
 "use client";
 
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
-import { BarChart3, Grip, LayoutGrid, LogOut, User as UserIcon } from "lucide-react";
+import { LogOut, User as UserIcon, Grip, LayoutGrid } from "lucide-react";
 
 import {
   SidebarHeader,
@@ -16,11 +16,23 @@ import { FranchiseFlowLogo } from "@/components/icons";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { currentUser } from "@/lib/data";
+import { useAuth } from "@/hooks/use-auth";
 
 
 export function AppSidebar() {
   const pathname = usePathname();
+  const router = useRouter();
+  const { user: currentUser, logout } = useAuth();
+
+
+  const handleLogout = () => {
+    logout();
+    router.push('/login');
+  };
+
+  if (!currentUser) {
+    return null; // Or a loading spinner
+  }
 
   const isActive = (path: string) => {
     return pathname === path;
@@ -64,7 +76,7 @@ export function AppSidebar() {
                 </Avatar>
                 <div className="text-left">
                   <p className="text-sm font-medium">{currentUser.name}</p>
-                  <p className="text-xs text-muted-foreground">Franchisee Evaluator</p>
+                  <p className="text-xs text-muted-foreground">{currentUser.role} - {currentUser.state}</p>
                 </div>
               </Button>
             </DropdownMenuTrigger>
@@ -73,7 +85,7 @@ export function AppSidebar() {
                 <div className="flex flex-col space-y-1">
                   <p className="text-sm font-medium leading-none">{currentUser.name}</p>
                   <p className="text-xs leading-none text-muted-foreground">
-                    {currentUser.name.toLowerCase().replace(' ', '.')}@franchise.com
+                    {currentUser.name.toLowerCase().replace(/ /g, '.')}@franchise.com
                   </p>
                 </div>
               </DropdownMenuLabel>
@@ -82,7 +94,7 @@ export function AppSidebar() {
                 <UserIcon className="mr-2 h-4 w-4" />
                 <span>Profile</span>
               </DropdownMenuItem>
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={handleLogout}>
                 <LogOut className="mr-2 h-4 w-4" />
                 <span>Log out</span>
               </DropdownMenuItem>
