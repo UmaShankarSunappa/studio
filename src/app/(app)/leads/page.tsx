@@ -7,7 +7,6 @@ import {
   Youtube,
   Users,
   Globe,
-  Phone,
   User,
   MoreVertical,
 } from "lucide-react";
@@ -44,7 +43,6 @@ const sourceIcons: Record<LeadSource, React.ElementType> = {
   YouTube: Youtube,
   "Field Marketing": Users,
   Website: Globe,
-  IVR: Phone,
 };
 
 export default function LeadsPage() {

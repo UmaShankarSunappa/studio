@@ -1,4 +1,4 @@
-export type LeadSource = "Newspaper" | "YouTube" | "Field Marketing" | "Website" | "IVR";
+export type LeadSource = "Newspaper" | "YouTube" | "Field Marketing" | "Website";
 
 export type LeadStatus =
   | "New"

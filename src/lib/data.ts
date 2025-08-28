@@ -18,7 +18,7 @@ const leadStatuses: LeadStatus[] = [
   "Sales - Follow-up", "Converted"
 ];
 
-const leadSources: LeadSource[] = ["Newspaper", "YouTube", "Field Marketing", "Website", "IVR"];
+const leadSources: LeadSource[] = ["Newspaper", "YouTube", "Field Marketing", "Website"];
 const cities = [
   { name: "Mumbai", state: "Maharashtra" }, { name: "Delhi", state: "Delhi" },
   { name: "Bangalore", state: "Karnataka" }, { name: "Chennai", state: "Tamil Nadu" },
