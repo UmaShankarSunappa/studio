@@ -8,7 +8,7 @@ import {
   Users,
   Globe,
   User,
-  MoreVertical,
+  Share2,
 } from "lucide-react";
 import { format } from "date-fns";
 
@@ -45,6 +45,7 @@ const sourceIcons: Record<LeadSource, React.ElementType> = {
   YouTube: Youtube,
   "Field Marketing": Users,
   Website: Globe,
+  Referral: Share2,
 };
 
 export default function LeadsPage() {
