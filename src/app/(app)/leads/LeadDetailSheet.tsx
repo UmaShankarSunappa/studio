@@ -11,7 +11,6 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-  CardDescription,
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
@@ -26,19 +25,29 @@ import {
   History,
   MessageSquare,
   StickyNote,
+  CheckCircle,
 } from 'lucide-react';
 import { format } from 'date-fns';
-import type { Lead } from '@/types';
+import type { Lead, LeadStatus } from '@/types';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { currentUser } from '@/lib/data';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { leadStatuses } from '@/lib/data';
 
 interface LeadDetailSheetProps {
   lead: Lead | null;
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
   onAddNote: (leadId: string, noteText: string) => void;
+  onUpdateStatus: (leadId: string, status: LeadStatus) => void;
 }
 
 export function LeadDetailSheet({
@@ -46,6 +55,7 @@ export function LeadDetailSheet({
   isOpen,
   onOpenChange,
   onAddNote,
+  onUpdateStatus,
 }: LeadDetailSheetProps) {
   const [note, setNote] = React.useState('');
 
@@ -57,6 +67,8 @@ export function LeadDetailSheet({
   };
 
   if (!lead) return null;
+
+  const isAssignedToCurrentUser = lead.assignedUser?.id === currentUser.id;
 
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
@@ -75,6 +87,43 @@ export function LeadDetailSheet({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
               {/* Column 1: Details */}
               <div className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <CheckCircle className="w-5 h-5" />
+                      Lead Status
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {isAssignedToCurrentUser ? (
+                      <Select
+                        value={lead.status}
+                        onValueChange={(newStatus: LeadStatus) =>
+                          onUpdateStatus(lead.id, newStatus)
+                        }
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Update status..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {leadStatuses.map((status) => (
+                            <SelectItem key={status} value={status}>
+                              {status}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      <Badge variant="secondary" className="text-base">
+                        {lead.status}
+                      </Badge>
+                    )}
+                     <p className="text-sm text-muted-foreground mt-2">
+                        Assigned to: {lead.assignedUser ? (lead.assignedUser.id === currentUser.id ? 'You' : lead.assignedUser.name) : 'Unassigned'}
+                    </p>
+                  </CardContent>
+                </Card>
+
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
@@ -137,8 +186,11 @@ export function LeadDetailSheet({
                     </div>
                   </CardContent>
                 </Card>
+              </div>
 
-                <Card>
+              {/* Column 2: Interactions & Notes */}
+              <div className="space-y-6">
+                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <History className="w-5 h-5" />
@@ -166,10 +218,7 @@ export function LeadDetailSheet({
                     </ul>
                   </CardContent>
                 </Card>
-              </div>
 
-              {/* Column 2: Interactions & Notes */}
-              <div className="space-y-6">
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
@@ -191,6 +240,7 @@ export function LeadDetailSheet({
                     ))}
                   </CardContent>
                 </Card>
+
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">

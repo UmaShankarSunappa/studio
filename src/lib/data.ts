@@ -12,7 +12,7 @@ export const users: User[] = [
   { id: 'user-3', name: 'Chen Wei', avatar: 'https://i.pravatar.cc/150?u=user-3' },
 ];
 
-const leadStatuses: LeadStatus[] = [
+export const leadStatuses: LeadStatus[] = [
   "New", "WhatsApp - Sent", "WhatsApp - Delivery Failed",
   "Form 2 - Pending", "Form 2 - Submitted", "Form 2 - No Response",
   "Sales - Follow-up", "Converted"
@@ -59,11 +59,11 @@ export const leads: Lead[] = Array.from({ length: 50 }, (_, i) => {
   ];
 
   const notes: Note[] = [];
-  if (i % 5 === 0) {
+  if (i % 5 === 0 && assignedUser) {
       notes.push({
           text: "Follow up next week regarding Form-2 submission.",
           date: new Date(),
-          user: users[i % users.length]
+          user: assignedUser
       })
   }
 

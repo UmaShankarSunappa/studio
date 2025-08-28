@@ -75,25 +75,39 @@ export default function LeadsPage() {
   };
   
   const handleAddNote = (leadId: string, noteText: string) => {
-    setLeads(prevLeads => prevLeads.map(lead => {
-        if (lead.id === leadId) {
-            const newNote = {
-                text: noteText,
-                date: new Date(),
-                user: currentUser
-            };
-            return {
-                ...lead,
-                notes: [...lead.notes, newNote]
-            };
-        }
-        return lead;
-    }));
-    // Also update the selected lead to refresh the sheet view
-    setSelectedLead(prev => prev ? {
-        ...prev,
-        notes: [...prev.notes, { text: noteText, date: new Date(), user: currentUser }]
+    const newNote = {
+      text: noteText,
+      date: new Date(),
+      user: currentUser
+    };
+    setLeads(prevLeads => prevLeads.map(lead => 
+      lead.id === leadId 
+        ? { ...lead, notes: [...lead.notes, newNote] } 
+        : lead
+    ));
+    setSelectedLead(prev => prev ? { ...prev, notes: [...prev.notes, newNote] } : null);
+  };
+
+  const handleUpdateStatus = (leadId: string, status: LeadStatus) => {
+    const newStatusHistoryEntry = { status, date: new Date() };
+    setLeads(prevLeads => prevLeads.map(lead => 
+        lead.id === leadId
+          ? { 
+              ...lead, 
+              status,
+              statusHistory: [...lead.statusHistory, newStatusHistoryEntry]
+            }
+          : lead
+    ));
+    setSelectedLead(prev => prev ? { 
+        ...prev, 
+        status,
+        statusHistory: [...prev.statusHistory, newStatusHistoryEntry]
     } : null);
+    toast({
+        title: "Status Updated",
+        description: `Lead status has been updated to "${status}".`
+    });
   };
 
   const filteredLeads = React.useMemo(() => {
@@ -238,6 +252,7 @@ export default function LeadsPage() {
         isOpen={isSheetOpen} 
         onOpenChange={setIsSheetOpen}
         onAddNote={handleAddNote}
+        onUpdateStatus={handleUpdateStatus}
       />
     </>
   );
