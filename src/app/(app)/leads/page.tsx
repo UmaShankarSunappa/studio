@@ -11,8 +11,10 @@ import {
   User,
   Share2,
   ChevronDown,
+  PlusCircle,
 } from "lucide-react";
 import { format } from "date-fns";
+import { v4 as uuidv4 } from 'uuid';
 
 import type { Lead, LeadSource, LeadStatus, User as UserType } from "@/types";
 import { leads as allLeads, allUsers, leadStatuses } from "@/lib/data";
@@ -30,6 +32,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { LeadDetailSheet } from './LeadDetailSheet';
+import { CreateLeadDialog } from './CreateLeadDialog';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -80,6 +83,7 @@ export default function LeadsPage() {
   });
   const [selectedLead, setSelectedLead] = React.useState<Lead | null>(null);
   const [isSheetOpen, setIsSheetOpen] = React.useState(false);
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = React.useState(false);
 
   const currentUser = user!;
 
@@ -92,6 +96,24 @@ export default function LeadsPage() {
     toast({
       title: "Lead Assigned!",
       description: `Lead has been successfully assigned to ${userToAssign.name}.`,
+    });
+  };
+  
+  const handleCreateLead = (newLeadData: Omit<Lead, 'id' | 'dateAdded' | 'status' | 'statusHistory' | 'interactions' | 'notes' | 'assignedUser'>) => {
+    const now = new Date();
+    const newLead: Lead = {
+        ...newLeadData,
+        id: uuidv4(),
+        dateAdded: now,
+        status: "New",
+        statusHistory: [{ status: "New", date: now }],
+        interactions: [{ type: "Manual Entry", date: now, notes: "Lead created manually." }],
+        notes: [],
+    };
+    setLeads(prevLeads => [newLead, ...prevLeads]);
+    toast({
+        title: "Lead Created!",
+        description: `${newLead.name} has been successfully added to the system.`
     });
   };
 
@@ -249,6 +271,10 @@ export default function LeadsPage() {
                     onChange={(selected) => setFilters(prev => ({ ...prev, status: selected as LeadStatus[] }))}
                     placeholder="Filter by status..."
                 />
+                <Button onClick={() => setIsCreateDialogOpen(true)}>
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    Create Lead
+                </Button>
               </div>
             </div>
           </CardHeader>
@@ -355,6 +381,11 @@ export default function LeadsPage() {
         onOpenChange={setIsSheetOpen}
         onAddNote={handleAddNote}
         onUpdateStatus={handleUpdateStatus}
+      />
+       <CreateLeadDialog 
+        isOpen={isCreateDialogOpen}
+        onOpenChange={setIsCreateDialogOpen}
+        onCreateLead={handleCreateLead}
       />
     </>
   );
