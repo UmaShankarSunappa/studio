@@ -15,7 +15,7 @@ import {
 import { format } from "date-fns";
 
 import type { Lead, LeadSource, LeadStatus, User as UserType } from "@/types";
-import { leads as allLeads, allUsers } from "@/lib/data";
+import { leads as allLeads, allUsers, leadStatuses } from "@/lib/data";
 import { useAuth } from "@/hooks/use-auth";
 import { Input } from "@/components/ui/input";
 import {
@@ -36,6 +36,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { MultiSelect } from "@/components/ui/multi-select";
 
 const statusColors: Record<LeadStatus, string> = {
   "New": "bg-blue-100 text-blue-800",
@@ -68,10 +69,14 @@ export default function LeadsPage() {
   const { user } = useAuth();
   const [leads, setLeads] = React.useState<Lead[]>(allLeads);
   const { toast } = useToast();
-  const [filters, setFilters] = React.useState({
+  const [filters, setFilters] = React.useState<{
+    search: string;
+    source: string;
+    status: LeadStatus[];
+  }>({
     search: "",
     source: "all",
-    status: "all",
+    status: [],
   });
   const [selectedLead, setSelectedLead] = React.useState<Lead | null>(null);
   const [isSheetOpen, setIsSheetOpen] = React.useState(false);
@@ -179,7 +184,7 @@ export default function LeadsPage() {
       const matchesSource =
         filters.source === "all" || lead.source === filters.source;
       const matchesStatus =
-        filters.status === "all" || lead.status === filters.status;
+        filters.status.length === 0 || filters.status.includes(lead.status);
       return matchesSearch && matchesSource && matchesStatus;
     });
   }, [leads, filters, currentUser]);
@@ -195,6 +200,8 @@ export default function LeadsPage() {
     }
     return [];
   };
+
+  const statusOptions = leadStatuses.map(status => ({ value: status, label: status }));
 
   return (
     <>
@@ -235,19 +242,13 @@ export default function LeadsPage() {
                     ))}
                   </SelectContent>
                 </Select>
-                <Select value={filters.status} onValueChange={(value) => setFilters(prev => ({ ...prev, status: value }))}>
-                  <SelectTrigger className="w-full md:w-48">
-                    <SelectValue placeholder="Filter by status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Statuses</SelectItem>
-                     {Object.keys(statusColors).map((status) => (
-                      <SelectItem key={status} value={status}>
-                        {status}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <MultiSelect
+                    className="w-full md:w-48"
+                    options={statusOptions}
+                    selected={filters.status}
+                    onChange={(selected) => setFilters(prev => ({ ...prev, status: selected as LeadStatus[] }))}
+                    placeholder="Filter by status..."
+                />
               </div>
             </div>
           </CardHeader>
