@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -9,11 +10,12 @@ import {
   Globe,
   User,
   Share2,
+  ChevronDown,
 } from "lucide-react";
 import { format } from "date-fns";
 
-import type { Lead, LeadSource, LeadStatus } from "@/types";
-import { leads as allLeads } from "@/lib/data";
+import type { Lead, LeadSource, LeadStatus, User as UserType } from "@/types";
+import { leads as allLeads, allUsers } from "@/lib/data";
 import { useAuth } from "@/hooks/use-auth";
 import { Input } from "@/components/ui/input";
 import {
@@ -28,6 +30,12 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { LeadDetailSheet } from './LeadDetailSheet';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const statusColors: Record<LeadStatus, string> = {
   "New": "bg-blue-100 text-blue-800",
@@ -63,15 +71,15 @@ export default function LeadsPage() {
 
   const currentUser = user!;
 
-  const handleAssign = (leadId: string) => {
+  const handleAssign = (leadId: string, userToAssign: UserType) => {
     setLeads((prevLeads) =>
       prevLeads.map((lead) =>
-        lead.id === leadId ? { ...lead, assignedUser: currentUser } : lead
+        lead.id === leadId ? { ...lead, assignedUser: userToAssign } : lead
       )
     );
     toast({
       title: "Lead Assigned!",
-      description: "You have successfully assigned the lead to yourself.",
+      description: `Lead has been successfully assigned to ${userToAssign.name}.`,
     });
   };
 
@@ -169,6 +177,18 @@ export default function LeadsPage() {
     });
   }, [leads, filters, currentUser]);
 
+  const evaluators = React.useMemo(() => allUsers.filter(u => u.role === 'Evaluator'), []);
+
+  const getAssignableEvaluators = (lead: Lead) => {
+    if (currentUser.role === 'Admin') {
+      return evaluators.filter(e => e.state === lead.state);
+    }
+    if (currentUser.role === 'Manager') {
+      return evaluators.filter(e => e.state === currentUser.state && e.state === lead.state);
+    }
+    return [];
+  };
+
   return (
     <>
       <div className="space-y-6">
@@ -241,8 +261,8 @@ export default function LeadsPage() {
                   {filteredLeads.map((lead) => {
                     const SourceIcon = sourceIcons[lead.source];
                     const canBeAssigned = lead.status !== 'New' && lead.status !== 'WhatsApp - Sent' && !lead.assignedUser;
-                    const canAssignToMe = (currentUser.role === 'Evaluator' && currentUser.state === lead.state) || currentUser.role !== 'Evaluator';
-
+                    
+                    const assignableEvaluators = getAssignableEvaluators(lead);
 
                     return (
                       <tr 
@@ -272,10 +292,34 @@ export default function LeadsPage() {
                               <User className="h-4 w-4 text-muted-foreground" />
                               <span>{lead.assignedUser.id === currentUser.id ? 'You' : lead.assignedUser.name}</span>
                             </div>
-                          ) : canBeAssigned && canAssignToMe ? (
-                            <Button size="sm" onClick={() => handleAssign(lead.id)}>
-                              Assign to Me
-                            </Button>
+                          ) : canBeAssigned ? (
+                            <>
+                              {currentUser.role === 'Evaluator' && (
+                                <Button size="sm" onClick={() => handleAssign(lead.id, currentUser)}>
+                                  Assign to Me
+                                </Button>
+                              )}
+                              {(currentUser.role === 'Admin' || currentUser.role === 'Manager') && (
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button size="sm" variant="outline">
+                                      Assign to... <ChevronDown className="ml-2 h-4 w-4" />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent>
+                                    {assignableEvaluators.length > 0 ? (
+                                      assignableEvaluators.map(evaluator => (
+                                        <DropdownMenuItem key={evaluator.id} onClick={() => handleAssign(lead.id, evaluator)}>
+                                          {evaluator.name}
+                                        </DropdownMenuItem>
+                                      ))
+                                    ) : (
+                                      <DropdownMenuItem disabled>No evaluators in {lead.state}</DropdownMenuItem>
+                                    )}
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                              )}
+                            </>
                           ) : (
                             <span className="text-muted-foreground">-</span>
                           )}
