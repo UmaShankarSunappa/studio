@@ -250,7 +250,8 @@ export default function LeadsPage() {
                 <thead className="text-left text-muted-foreground">
                   <tr className="border-b">
                     <th className="p-4 font-medium">Lead Name</th>
-                    <th className="p-4 font-medium">Location</th>
+                    <th className="p-4 font-medium">City</th>
+                    <th className="p-4 font-medium">State</th>
                     <th className="p-4 font-medium">Source</th>
                     <th className="p-4 font-medium">Status</th>
                     <th className="p-4 font-medium">Date Added</th>
@@ -271,7 +272,8 @@ export default function LeadsPage() {
                         onClick={() => handleRowClick(lead)}
                       >
                         <td className="p-4 font-medium">{lead.name}</td>
-                        <td className="p-4 text-muted-foreground">{lead.city}, {lead.state}</td>
+                        <td className="p-4 text-muted-foreground">{lead.city}</td>
+                        <td className="p-4 text-muted-foreground">{lead.state}</td>
                         <td className="p-4">
                           <div className="flex items-center gap-2">
                             <SourceIcon className="h-4 w-4 text-muted-foreground" />
