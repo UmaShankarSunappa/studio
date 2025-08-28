@@ -104,7 +104,7 @@ export function LeadDetailSheet({
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Briefcase className="w-5 h-5" />
-                      Form-2 Data
+                      More details
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4 text-sm">
