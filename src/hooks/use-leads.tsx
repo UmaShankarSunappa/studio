@@ -1,8 +1,9 @@
+
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import type { Lead } from '@/types';
-import { leads as initialLeads } from '@/lib/data';
+import { leads as initialLeads, leadStatuses } from '@/lib/data';
 
 interface LeadContextType {
   leads: Lead[];
@@ -19,8 +20,9 @@ export const LeadProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     try {
       const storedLeads = localStorage.getItem('allLeads');
+      let leadsToLoad: Lead[];
+
       if (storedLeads) {
-        // Parse dates from stringified JSON
         const parsedLeads: Lead[] = JSON.parse(storedLeads).map((lead: any) => ({
             ...lead,
             dateAdded: new Date(lead.dateAdded),
@@ -28,12 +30,22 @@ export const LeadProvider = ({ children }: { children: ReactNode }) => {
             interactions: lead.interactions.map((i: any) => ({...i, date: new Date(i.date)})),
             notes: lead.notes.map((n: any) => ({...n, date: new Date(n.date)})),
         }));
-        setLeads(parsedLeads);
+        
+        // Clean up data: check for invalid statuses and reset them.
+        leadsToLoad = parsedLeads.map(lead => {
+            if (!leadStatuses.includes(lead.status)) {
+                return { ...lead, status: "New" as const };
+            }
+            return lead;
+        });
+
       } else {
-        // Initialize with data from file if nothing in localStorage
-        setLeads(initialLeads);
-        localStorage.setItem('allLeads', JSON.stringify(initialLeads));
+        leadsToLoad = initialLeads;
       }
+      
+      setLeads(leadsToLoad);
+      localStorage.setItem('allLeads', JSON.stringify(leadsToLoad));
+
     } catch (error) {
       console.error("Failed to load or parse leads from localStorage", error);
       setLeads(initialLeads); // Fallback to initial data on error
