@@ -1,4 +1,4 @@
-export type LeadSource = "Newspaper" | "YouTube" | "Field Marketing" | "Website" | "Referral";
+export type LeadSource = "Newspaper" | "YouTube" | "Field Marketing" | "Website" | "Referral" | string; // Allow campaign names as sources
 
 export type LeadStatus =
   | "New"
@@ -59,4 +59,12 @@ export type Lead = {
   statusHistory: StatusHistory[];
   interactions: Interaction[];
   notes: Note[];
+};
+
+export type Campaign = {
+  id: string;
+  name: string;
+  slug: string;
+  createdAt: Date;
+  leadCount: number;
 };
