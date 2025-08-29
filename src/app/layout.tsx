@@ -2,6 +2,7 @@ import type {Metadata} from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "@/hooks/use-auth";
+import { LeadProvider } from '@/hooks/use-leads';
 
 
 export const metadata: Metadata = {
@@ -23,7 +24,9 @@ export default function RootLayout({
       </head>
       <body className="font-body antialiased">
         <AuthProvider>
+          <LeadProvider>
             {children}
+          </LeadProvider>
         </AuthProvider>
         <Toaster />
       </body>
