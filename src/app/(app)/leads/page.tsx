@@ -182,6 +182,18 @@ export default function LeadsPage() {
         description: `Lead status has been updated to "${status}".`
     });
   };
+  
+   const handleUpdateLead = (leadId: string, data: Partial<Omit<Lead, 'id'>>) => {
+    const updatedLeads = leads.map(lead => 
+      lead.id === leadId ? { ...lead, ...data } : lead
+    );
+    setLeads(updatedLeads);
+    setSelectedLead(prev => prev ? { ...prev, ...data } : null);
+    toast({
+        title: "Lead Updated",
+        description: "The lead's details have been successfully updated."
+    });
+  };
 
   const filteredLeads = React.useMemo(() => {
     return leads.filter((lead) => {
@@ -381,6 +393,7 @@ export default function LeadsPage() {
         onOpenChange={setIsSheetOpen}
         onAddNote={handleAddNote}
         onUpdateStatus={handleUpdateStatus}
+        onUpdateLead={handleUpdateLead}
       />
        <CreateLeadDialog 
         isOpen={isCreateDialogOpen}
