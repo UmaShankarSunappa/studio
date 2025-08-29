@@ -43,6 +43,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { MultiSelect } from "@/components/ui/multi-select";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const statusColors: Record<LeadStatus, string> = {
   "New": "bg-blue-100 text-blue-800",
@@ -88,6 +89,7 @@ export default function LeadsPage() {
   const [selectedLead, setSelectedLead] = React.useState<Lead | null>(null);
   const [isSheetOpen, setIsSheetOpen] = React.useState(false);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = React.useState(false);
+  const [selectedLeadIds, setSelectedLeadIds] = React.useState<string[]>([]);
 
   const currentUser = user!;
 
@@ -101,6 +103,21 @@ export default function LeadsPage() {
       title: "Lead Assigned!",
       description: `Lead has been successfully assigned to ${userToAssign.name}.`,
     });
+  };
+
+  const handleBulkAssign = (userToAssign: UserType) => {
+    setLeads(prevLeads =>
+      prevLeads.map(lead =>
+        selectedLeadIds.includes(lead.id)
+          ? { ...lead, assignedUser: userToAssign }
+          : lead
+      )
+    );
+    toast({
+      title: "Leads Assigned!",
+      description: `${selectedLeadIds.length} leads have been assigned to ${userToAssign.name}.`,
+    });
+    setSelectedLeadIds([]);
   };
   
   const handleCreateLead = (newLeadData: Omit<Lead, 'id' | 'dateAdded' | 'status' | 'statusHistory' | 'interactions' | 'notes' | 'assignedUser'>) => {
@@ -230,17 +247,40 @@ export default function LeadsPage() {
 
   const evaluators = React.useMemo(() => allUsers.filter(u => u.role === 'Evaluator'), [allUsers]);
 
-  const getAssignableEvaluators = (lead: Lead) => {
+  const getAssignableEvaluators = (lead?: Lead) => {
     if (currentUser.role === 'Admin') {
-      return evaluators.filter(e => e.state === lead.state);
+      if (lead) {
+        return evaluators.filter(e => e.state === lead.state);
+      }
+      return evaluators;
     }
     if (currentUser.role === 'Manager') {
-      return evaluators.filter(e => e.state === currentUser.state && e.state === lead.state);
+      return evaluators.filter(e => e.state === currentUser.state && (!lead || e.state === lead.state));
     }
     return [];
   };
 
   const statusOptions = leadStatuses.map(status => ({ value: status, label: status }));
+  
+  const assignableStatuses: LeadStatus[] = ['WhatsApp - Delivery Failed', 'Form 2 - Submitted', 'Form 2 - No Response', 'Form 2 - Pending'];
+  const assignableLeads = filteredLeads.filter(lead => assignableStatuses.includes(lead.status) && !lead.assignedUser);
+
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      setSelectedLeadIds(assignableLeads.map(l => l.id));
+    } else {
+      setSelectedLeadIds([]);
+    }
+  };
+
+  const handleSelectOne = (leadId: string, checked: boolean) => {
+    if (checked) {
+      setSelectedLeadIds(prev => [...prev, leadId]);
+    } else {
+      setSelectedLeadIds(prev => prev.filter(id => id !== leadId));
+    }
+  };
+
 
   if (leadsLoading || usersLoading) {
     return (
@@ -249,6 +289,8 @@ export default function LeadsPage() {
       </div>
     );
   }
+  
+  const showCheckboxes = currentUser.role === 'Admin' || currentUser.role === 'Manager';
 
   return (
     <>
@@ -265,7 +307,29 @@ export default function LeadsPage() {
         <Card>
           <CardHeader>
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-              <CardTitle className="text-xl">All Leads ({filteredLeads.length})</CardTitle>
+              <div className="flex items-center gap-4">
+                  <CardTitle className="text-xl">All Leads ({filteredLeads.length})</CardTitle>
+                  {selectedLeadIds.length > 0 && showCheckboxes && (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button size="sm">
+                          Bulk Assign ({selectedLeadIds.length}) <ChevronDown className="ml-2 h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent>
+                        {getAssignableEvaluators().length > 0 ? (
+                            getAssignableEvaluators().map(evaluator => (
+                                <DropdownMenuItem key={evaluator.id} onClick={() => handleBulkAssign(evaluator)}>
+                                {evaluator.name} ({evaluator.state})
+                                </DropdownMenuItem>
+                            ))
+                        ) : (
+                            <DropdownMenuItem disabled>No evaluators available</DropdownMenuItem>
+                        )}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  )}
+              </div>
               <div className="flex flex-col gap-2 md:flex-row md:items-center">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -308,6 +372,16 @@ export default function LeadsPage() {
               <table className="w-full text-sm">
                 <thead className="text-left text-muted-foreground">
                   <tr className="border-b">
+                    {showCheckboxes && (
+                      <th className="p-4 font-medium">
+                        <Checkbox
+                          checked={selectedLeadIds.length > 0 && selectedLeadIds.length === assignableLeads.length}
+                          onCheckedChange={handleSelectAll}
+                          aria-label="Select all"
+                          disabled={assignableLeads.length === 0}
+                        />
+                      </th>
+                    )}
                     <th className="p-4 font-medium">Lead Name</th>
                     <th className="p-4 font-medium">City</th>
                     <th className="p-4 font-medium">State</th>
@@ -320,32 +394,45 @@ export default function LeadsPage() {
                 <tbody>
                   {filteredLeads.map((lead) => {
                     const SourceIcon = sourceIcons[lead.source];
-                    const assignableStatuses: LeadStatus[] = ['WhatsApp - Delivery Failed', 'Form 2 - Submitted', 'Form 2 - No Response', 'Form 2 - Pending'];
                     const canBeAssigned = assignableStatuses.includes(lead.status) && !lead.assignedUser;
                     
                     const assignableEvaluators = getAssignableEvaluators(lead);
+                    
+                    const isSelectable = showCheckboxes && canBeAssigned;
 
                     return (
                       <tr 
                         key={lead.id} 
-                        className="border-b transition-colors hover:bg-muted/50 cursor-pointer"
-                        onClick={() => handleRowClick(lead)}
+                        className="border-b transition-colors hover:bg-muted/50 data-[selected=true]:bg-muted/50"
+                        data-selected={selectedLeadIds.includes(lead.id)}
                       >
-                        <td className="p-4 font-medium">{lead.name}</td>
-                        <td className="p-4 text-muted-foreground">{lead.city}</td>
-                        <td className="p-4 text-muted-foreground">{lead.state}</td>
-                        <td className="p-4">
+                         {showCheckboxes && (
+                          <td className="p-4">
+                            {isSelectable ? (
+                               <Checkbox
+                                checked={selectedLeadIds.includes(lead.id)}
+                                onCheckedChange={(checked) => handleSelectOne(lead.id, !!checked)}
+                                aria-label={`Select lead ${lead.name}`}
+                                onClick={(e) => e.stopPropagation()}
+                              />
+                            ) : null}
+                          </td>
+                        )}
+                        <td className="p-4 font-medium cursor-pointer" onClick={() => handleRowClick(lead)}>{lead.name}</td>
+                        <td className="p-4 text-muted-foreground cursor-pointer" onClick={() => handleRowClick(lead)}>{lead.city}</td>
+                        <td className="p-4 text-muted-foreground cursor-pointer" onClick={() => handleRowClick(lead)}>{lead.state}</td>
+                        <td className="p-4 cursor-pointer" onClick={() => handleRowClick(lead)}>
                           <div className="flex items-center gap-2">
                             <SourceIcon className="h-4 w-4 text-muted-foreground" />
                             <span>{lead.source}</span>
                           </div>
                         </td>
-                        <td className="p-4">
+                        <td className="p-4 cursor-pointer" onClick={() => handleRowClick(lead)}>
                           <Badge className={`${statusColors[lead.status]} hover:${statusColors[lead.status]}`}>
                             {lead.status}
                           </Badge>
                         </td>
-                        <td className="p-4 text-muted-foreground">
+                        <td className="p-4 text-muted-foreground cursor-pointer" onClick={() => handleRowClick(lead)}>
                           {format(lead.dateAdded, "MMM d, yyyy")}
                         </td>
                         <td className="p-4 text-center" onClick={(e) => e.stopPropagation()}>
