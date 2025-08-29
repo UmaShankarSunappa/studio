@@ -2,7 +2,7 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
-import { LogOut, User as UserIcon, Grip, LayoutGrid } from "lucide-react";
+import { LogOut, User as UserIcon, Grip, LayoutGrid, Users } from "lucide-react";
 
 import {
   SidebarHeader,
@@ -64,6 +64,16 @@ export function AppSidebar() {
               </SidebarMenuButton>
             </Link>
           </SidebarMenuItem>
+          {currentUser.role === 'Admin' && (
+             <SidebarMenuItem>
+                <Link href="/users" legacyBehavior passHref>
+                  <SidebarMenuButton tooltip="Users" isActive={isActive('/users')}>
+                    <Users />
+                    <span>Users</span>
+                  </SidebarMenuButton>
+                </Link>
+              </SidebarMenuItem>
+          )}
         </SidebarMenu>
       </SidebarContent>
       <SidebarFooter>

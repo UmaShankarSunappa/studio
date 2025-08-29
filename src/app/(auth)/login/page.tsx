@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
-import { allUsers } from "@/lib/data";
+import { useUsers } from "@/hooks/use-users";
 import {
   Card,
   CardContent,
@@ -22,10 +22,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { FranchiseFlowLogo } from "@/components/icons";
 import { User } from "@/types";
+import { Loader2 } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
   const { login } = useAuth();
+  const { users: allUsers, loading: usersLoading } = useUsers();
   const [selectedUserId, setSelectedUserId] = React.useState<string>("");
   const [error, setError] = React.useState<string>("");
 
@@ -42,6 +44,14 @@ export default function LoginPage() {
       setError("Selected user not found.");
     }
   };
+
+  if (usersLoading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-muted/40">

@@ -18,9 +18,10 @@ import { format } from "date-fns";
 import { v4 as uuidv4 } from 'uuid';
 
 import type { Lead, LeadSource, LeadStatus, User as UserType } from "@/types";
-import { allUsers, leadStatuses } from "@/lib/data";
+import { leadStatuses } from "@/lib/data";
 import { useAuth } from "@/hooks/use-auth";
 import { useLeads } from "@/hooks/use-leads";
+import { useUsers } from "@/hooks/use-users";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -73,6 +74,7 @@ const sourceIcons: Record<LeadSource, React.ElementType> = {
 export default function LeadsPage() {
   const { user } = useAuth();
   const { leads, setLeads, loading: leadsLoading } = useLeads();
+  const { users: allUsers, loading: usersLoading } = useUsers();
   const { toast } = useToast();
   const [filters, setFilters] = React.useState<{
     search: string;
@@ -226,7 +228,7 @@ export default function LeadsPage() {
     });
   }, [leads, filters, currentUser]);
 
-  const evaluators = React.useMemo(() => allUsers.filter(u => u.role === 'Evaluator'), []);
+  const evaluators = React.useMemo(() => allUsers.filter(u => u.role === 'Evaluator'), [allUsers]);
 
   const getAssignableEvaluators = (lead: Lead) => {
     if (currentUser.role === 'Admin') {
@@ -240,7 +242,7 @@ export default function LeadsPage() {
 
   const statusOptions = leadStatuses.map(status => ({ value: status, label: status }));
 
-  if (leadsLoading) {
+  if (leadsLoading || usersLoading) {
     return (
       <div className="flex h-[80vh] items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin" />

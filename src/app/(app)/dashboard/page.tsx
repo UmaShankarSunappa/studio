@@ -10,17 +10,18 @@ import {
   type ChartConfig,
 } from "@/components/ui/chart";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { allUsers } from "@/lib/data";
 import { LeadSource, LeadStatus } from "@/types";
 import { countBy, toPairs, sortBy, take } from 'lodash';
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/use-auth";
 import { useLeads } from "@/hooks/use-leads";
+import { useUsers } from "@/hooks/use-users";
 import { Loader2 } from "lucide-react";
 
 export default function DashboardPage() {
   const { user: currentUser } = useAuth();
   const { leads: allLeads, loading: leadsLoading } = useLeads();
+  const { users: allUsers, loading: usersLoading } = useUsers();
   
   const leads = React.useMemo(() => {
     if (!currentUser) return [];
@@ -48,7 +49,7 @@ export default function DashboardPage() {
         return allUsers.filter(u => u.id === currentUser.id);
     }
     return [];
-  }, [currentUser])
+  }, [currentUser, allUsers])
 
   // Source Performance Data
   const sourcePerformanceData = toPairs(countBy(leads, 'source')).map(([name, value]) => ({
@@ -85,7 +86,7 @@ export default function DashboardPage() {
       }
   });
 
-  if (leadsLoading) {
+  if (leadsLoading || usersLoading) {
     return (
       <div className="flex h-[80vh] items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin" />
