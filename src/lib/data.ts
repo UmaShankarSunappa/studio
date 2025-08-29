@@ -21,12 +21,7 @@ export const leadStatuses: LeadStatus[] = [
     "Form 2 - Submitted",
     "Form 2 - No Response",
     "In Discussion",
-    "Document Shared",
     "Follow-up Required",
-    "Site Visit Scheduled",
-    "In Evaluation",
-    "Negotiation Stage",
-    "On Hold",
     "Converted",
     "Not Interested"
 ];
@@ -53,7 +48,7 @@ export const leads: Lead[] = Array.from({ length: 150 }, (_, i) => {
   const cityInfo = cities[i % cities.length];
   const dateAdded = new Date(new Date().setDate(new Date().getDate() - i * 2));
   
-  const assignableStatuses = leadStatuses.filter(s => s !== "Not Interested");
+  const assignableStatuses = leadStatuses.filter(s => s !== "Not Interested" && s !== "Converted");
   const currentStatus = assignableStatuses[i % assignableStatuses.length];
   
   let assignedUser: User | undefined = undefined;

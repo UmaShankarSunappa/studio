@@ -53,12 +53,7 @@ const statusColors: Record<LeadStatus, string> = {
   "Form 2 - Submitted": "bg-indigo-100 text-indigo-800",
   "Form 2 - No Response": "bg-orange-100 text-orange-800",
   "In Discussion": "bg-sky-100 text-sky-800",
-  "Document Shared": "bg-cyan-100 text-cyan-800",
   "Follow-up Required": "bg-teal-100 text-teal-800",
-  "Site Visit Scheduled": "bg-fuchsia-100 text-fuchsia-800",
-  "In Evaluation": "bg-violet-100 text-violet-800",
-  "Negotiation Stage": "bg-pink-100 text-pink-800",
-  "On Hold": "bg-gray-200 text-gray-900",
   "Converted": "bg-emerald-100 text-emerald-800",
   "Not Interested": "bg-gray-100 text-gray-800",
 };
