@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -39,6 +40,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { CreateUserDialog } from "./CreateUserDialog";
+import { EditUserDialog } from "./EditUserDialog";
 
 export default function UsersPage() {
   const router = useRouter();
@@ -46,6 +48,8 @@ export default function UsersPage() {
   const { users, setUsers, loading: usersLoading } = useUsers();
   const { toast } = useToast();
   const [isCreateUserOpen, setIsCreateUserOpen] = React.useState(false);
+  const [isEditUserOpen, setIsEditUserOpen] = React.useState(false);
+  const [selectedUser, setSelectedUser] = React.useState<User | null>(null);
 
   React.useEffect(() => {
     if (!authLoading && currentUser?.role !== 'Admin') {
@@ -65,6 +69,25 @@ export default function UsersPage() {
         description: `${newUser.name} has been successfully added to the system.`
     });
   };
+
+  const handleEditClick = (user: User) => {
+    setSelectedUser(user);
+    setIsEditUserOpen(true);
+  };
+
+  const handleUpdateUser = (userId: string, data: Omit<User, 'id' | 'avatar'>) => {
+    setUsers(prevUsers =>
+      prevUsers.map(user =>
+        user.id === userId ? { ...user, ...data } : user
+      )
+    );
+    toast({
+      title: "User Updated!",
+      description: "The user's details have been successfully updated.",
+    });
+    setSelectedUser(null);
+  };
+
 
   const loading = authLoading || usersLoading;
 
@@ -143,7 +166,9 @@ export default function UsersPage() {
                                         </Button>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent align="end">
-                                        <DropdownMenuItem>Edit</DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => handleEditClick(user)} disabled={user.role === 'Admin'}>
+                                            Edit
+                                        </DropdownMenuItem>
                                         <DropdownMenuItem disabled={user.role === 'Admin'}>Delete</DropdownMenuItem>
                                     </DropdownMenuContent>
                                     </DropdownMenu>
@@ -160,6 +185,12 @@ export default function UsersPage() {
         isOpen={isCreateUserOpen}
         onOpenChange={setIsCreateUserOpen}
         onCreateUser={handleCreateUser}
+      />
+      <EditUserDialog
+        user={selectedUser}
+        isOpen={isEditUserOpen}
+        onOpenChange={setIsEditUserOpen}
+        onUpdateUser={handleUpdateUser}
       />
     </>
   );
