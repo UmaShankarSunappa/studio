@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Funnel, FunnelChart, LabelList, Tooltip as RechartsTooltip } from "recharts";
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Funnel, FunnelChart, LabelList, Tooltip as RechartsTooltip, PieChart, Pie, Cell } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import {
   ChartContainer,
@@ -10,8 +10,8 @@ import {
   type ChartConfig,
 } from "@/components/ui/chart";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { LeadSource, LeadStatus } from "@/types";
-import { countBy, toPairs, sortBy, take } from 'lodash';
+import { LeadSource, LeadStatus, CallStatus, Interaction } from "@/types";
+import { countBy, toPairs, sortBy, take, sumBy } from 'lodash';
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/use-auth";
 import { useLeads } from "@/hooks/use-leads";
@@ -85,6 +85,30 @@ export default function DashboardPage() {
           conversionRate: assignedLeads.length > 0 ? (convertedLeads / assignedLeads.length) * 100 : 0,
       }
   });
+  
+  // Call Performance Data
+  const callPerformanceData = users.filter(u => u.role === 'Evaluator').map(user => {
+    const userLeads = allLeads.filter(l => l.assignedUser?.id === user.id);
+    const userCalls = userLeads.flatMap(l => l.interactions).filter(i => i.type === 'Call');
+    
+    const totalCalls = userCalls.length;
+    const totalDuration = sumBy(userCalls, 'duration'); // sum of seconds
+    const statusCounts = countBy(userCalls, 'callStatus');
+
+    return {
+      user,
+      totalCalls,
+      totalDuration,
+      statusCounts
+    }
+  });
+
+  const callStatusBreakdown = (Object.keys(countBy(allLeads.flatMap(l => l.interactions).filter(i => i.type === 'Call'), 'callStatus')) as CallStatus[]).map((status, i) => ({
+      name: status,
+      value: sumBy(callPerformanceData, item => item.statusCounts[status] || 0),
+      fill: `hsl(var(--chart-${i + 1}))`
+  }));
+
 
   if (leadsLoading || usersLoading) {
     return (
@@ -181,6 +205,47 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
       </div>
+       <Card>
+          <CardHeader>
+            <CardTitle>Call Performance</CardTitle>
+            <CardDescription>Evaluator call metrics and outcomes.</CardDescription>
+          </CardHeader>
+          <CardContent className="grid gap-6 md:grid-cols-3">
+              <div className="md:col-span-2">
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>Evaluator</TableHead>
+                            <TableHead>Total Calls</TableHead>
+                            <TableHead>Total Duration (mins)</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {callPerformanceData.map(item => (
+                            <TableRow key={item.user.id}>
+                                <TableCell className="font-medium">{item.user.name}</TableCell>
+                                <TableCell>{item.totalCalls}</TableCell>
+                                <TableCell>{(item.totalDuration / 60).toFixed(1)}</TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+              </div>
+              <div>
+                  <h3 className="text-md font-medium mb-2 text-center">Call Status Breakdown</h3>
+                  <ChartContainer config={{}} className="h-48">
+                    <PieChart>
+                        <Pie data={callStatusBreakdown} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={60} label>
+                             {callStatusBreakdown.map((entry, index) => (
+                                <Cell key={`cell-${index}`} fill={entry.fill} />
+                            ))}
+                        </Pie>
+                        <RechartsTooltip />
+                    </PieChart>
+                  </ChartContainer>
+              </div>
+          </CardContent>
+      </Card>
       <div className="grid gap-6 md:grid-cols-2">
         <Card>
             <CardHeader>

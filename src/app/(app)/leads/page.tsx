@@ -13,11 +13,12 @@ import {
   ChevronDown,
   PlusCircle,
   Loader2,
+  Phone,
 } from "lucide-react";
 import { format } from "date-fns";
 import { v4 as uuidv4 } from 'uuid';
 
-import type { Lead, LeadSource, LeadStatus, User as UserType } from "@/types";
+import type { Lead, LeadSource, LeadStatus, User as UserType, Interaction, CallStatus } from "@/types";
 import { leadStatuses } from "@/lib/data";
 import { useAuth } from "@/hooks/use-auth";
 import { useLeads } from "@/hooks/use-leads";
@@ -36,6 +37,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { LeadDetailSheet } from './LeadDetailSheet';
 import { CreateLeadDialog } from './CreateLeadDialog';
+import { CallDialog } from './CallDialog';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -82,8 +84,10 @@ export default function LeadsPage() {
     status: [],
   });
   const [selectedLead, setSelectedLead] = React.useState<Lead | null>(null);
+  const [leadToCall, setLeadToCall] = React.useState<Lead | null>(null);
   const [isSheetOpen, setIsSheetOpen] = React.useState(false);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = React.useState(false);
+  const [isCallDialogOpen, setIsCallDialogOpen] = React.useState(false);
   const [selectedLeadIds, setSelectedLeadIds] = React.useState<string[]>([]);
 
   const currentUser = user!;
@@ -209,6 +213,38 @@ export default function LeadsPage() {
         title: "Lead Updated",
         description: "The lead's details have been successfully updated."
     });
+  };
+
+  const handleCallClick = (lead: Lead) => {
+    setLeadToCall(lead);
+    setIsCallDialogOpen(true);
+  };
+
+  const handleEndCall = (leadId: string, duration: number, callStatus: CallStatus) => {
+    const callInteraction: Interaction = {
+      type: 'Call',
+      date: new Date(),
+      notes: `Call ended with status: ${callStatus}`,
+      duration,
+      callStatus,
+    };
+
+    setLeads(prevLeads =>
+      prevLeads.map(lead =>
+        lead.id === leadId
+          ? { ...lead, interactions: [...lead.interactions, callInteraction] }
+          : lead
+      )
+    );
+
+    if (selectedLead && selectedLead.id === leadId) {
+      setSelectedLead(prev => prev ? { ...prev, interactions: [...prev.interactions, callInteraction] } : null);
+    }
+    
+    toast({
+        title: "Call Logged",
+        description: `Call with ${leadToCall?.name} logged. Duration: ${duration}s.`
+    })
   };
 
   const filteredLeads = React.useMemo(() => {
@@ -384,6 +420,7 @@ export default function LeadsPage() {
                     <th className="p-4 font-medium">Status</th>
                     <th className="p-4 font-medium">Date Added</th>
                     <th className="p-4 font-medium text-center">Assigned To</th>
+                     {currentUser.role === 'Evaluator' && <th className="p-4 font-medium text-center">Actions</th>}
                   </tr>
                 </thead>
                 <tbody>
@@ -468,6 +505,15 @@ export default function LeadsPage() {
                             <span className="text-muted-foreground">-</span>
                           )}
                         </td>
+                        {currentUser.role === 'Evaluator' && (
+                            <td className="p-4 text-center">
+                                {lead.assignedUser?.id === currentUser.id && (
+                                    <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); handleCallClick(lead); }}>
+                                        <Phone className="mr-2 h-4 w-4" /> Call
+                                    </Button>
+                                )}
+                            </td>
+                        )}
                       </tr>
                     );
                   })}
@@ -494,6 +540,12 @@ export default function LeadsPage() {
         isOpen={isCreateDialogOpen}
         onOpenChange={setIsCreateDialogOpen}
         onCreateLead={handleCreateLead}
+      />
+      <CallDialog
+        lead={leadToCall}
+        isOpen={isCallDialogOpen}
+        onOpenChange={setIsCallDialogOpen}
+        onEndCall={handleEndCall}
       />
     </>
   );

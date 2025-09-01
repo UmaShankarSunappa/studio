@@ -38,9 +38,15 @@ import {
   StickyNote,
   CheckCircle,
   Pencil,
+  Clock,
+  PhoneMissed,
+  PhoneOff,
+  PhoneForwarded,
+  PhoneCall,
+  Hash,
 } from 'lucide-react';
 import { format } from 'date-fns';
-import type { Lead, LeadStatus, UserState } from '@/types';
+import type { Lead, LeadStatus, UserState, CallStatus } from '@/types';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
@@ -94,6 +100,13 @@ interface LeadDetailSheetProps {
   onAddNote: (leadId: string, noteText: string) => void;
   onUpdateStatus: (leadId: string, status: LeadStatus, remarks?: string) => void;
   onUpdateLead: (leadId: string, data: LeadEditFormValues) => void;
+}
+
+const callStatusIcons: Record<CallStatus, React.ElementType> = {
+    "Connected": PhoneForwarded,
+    "Busy": PhoneMissed,
+    "Switched Off": PhoneOff,
+    "Phone Not Connected": PhoneCall
 }
 
 export function LeadDetailSheet({
@@ -173,6 +186,9 @@ export function LeadDetailSheet({
   if (!lead || !currentUser) return null;
 
   const isAssignedToCurrentUser = lead.assignedUser?.id === currentUser.id;
+  const callHistory = lead.interactions.filter(i => i.type === 'Call');
+  const totalCalls = callHistory.length;
+
 
   return (
     <>
@@ -318,6 +334,30 @@ export function LeadDetailSheet({
 
                     {/* Column 2: Interactions & Notes */}
                     <div className="space-y-6">
+                       <Card>
+                        <CardHeader> <CardTitle className="flex items-center justify-between gap-2"> <MessageSquare className="w-5 h-5" /> Call History <Badge variant="secondary">{totalCalls} calls</Badge> </CardTitle> </CardHeader>
+                        <CardContent className="space-y-4">
+                          {callHistory.length > 0 ? callHistory.map((interaction, index) => {
+                             const CallIcon = interaction.callStatus ? callStatusIcons[interaction.callStatus] : MessageSquare;
+                             return (
+                                <div key={index} className="flex items-start gap-3 text-sm">
+                                    <CallIcon className="w-4 h-4 text-muted-foreground mt-1 flex-shrink-0" />
+                                    <div className="flex-1">
+                                        <div className="flex justify-between items-center">
+                                            <p className="font-medium">{interaction.callStatus || 'Call'}</p>
+                                            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                                <Clock className="w-3 h-3" />
+                                                <span>{interaction.duration ?? 0}s</span>
+                                            </div>
+                                        </div>
+                                        <p className="text-xs text-muted-foreground">{format(new Date(interaction.date), 'MMM d, yyyy h:mm a')}</p>
+                                    </div>
+                                </div>
+                            )
+                          }) : <p className="text-sm text-muted-foreground">No calls have been made yet.</p>}
+                        </CardContent>
+                      </Card>
+
                       <Card>
                         <CardHeader> <CardTitle className="flex items-center gap-2"> <History className="w-5 h-5" /> Status History </CardTitle> </CardHeader>
                         <CardContent>
@@ -334,14 +374,7 @@ export function LeadDetailSheet({
                           </ul>
                         </CardContent>
                       </Card>
-                      <Card>
-                        <CardHeader> <CardTitle className="flex items-center gap-2"> <MessageSquare className="w-5 h-5" /> Interaction Log </CardTitle> </CardHeader>
-                        <CardContent className="space-y-4">
-                          {lead.interactions.map((interaction, index) => (
-                            <div key={index} className="text-sm"> <p className="font-medium">{interaction.type}</p> <p className="text-xs text-muted-foreground mb-1">{format(new Date(interaction.date), 'MMM d, yyyy h:mm a')}</p> <p className="text-muted-foreground bg-secondary p-2 rounded-md">{interaction.notes}</p> </div>
-                          ))}
-                        </CardContent>
-                      </Card>
+                      
                       <Card>
                         <CardHeader> <CardTitle className="flex items-center gap-2"> <StickyNote className="w-5 h-5" /> Follow-up Notes </CardTitle> </CardHeader>
                         <CardContent className="space-y-4">

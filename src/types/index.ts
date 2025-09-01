@@ -28,10 +28,14 @@ export type StatusHistory = {
   date: Date;
 };
 
+export type CallStatus = "Phone Not Connected" | "Switched Off" | "Busy" | "Connected";
+
 export type Interaction = {
   type: string;
   date: Date;
   notes: string;
+  duration?: number; // in seconds
+  callStatus?: CallStatus;
 };
 
 export type Note = {
