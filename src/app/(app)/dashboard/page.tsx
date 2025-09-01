@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -17,25 +18,76 @@ import { useAuth } from "@/hooks/use-auth";
 import { useLeads } from "@/hooks/use-leads";
 import { useUsers } from "@/hooks/use-users";
 import { Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { DateRangePicker } from "@/components/ui/date-range-picker";
+import { DateRange } from "react-day-picker";
+import { subDays, subMonths, subYears } from "date-fns";
+
+type DatePreset = "1m" | "3m" | "6m" | "1y";
 
 export default function DashboardPage() {
   const { user: currentUser } = useAuth();
   const { leads: allLeads, loading: leadsLoading } = useLeads();
   const { users: allUsers, loading: usersLoading } = useUsers();
-  
+  const [dateRange, setDateRange] = React.useState<DateRange | undefined>({
+    from: subDays(new Date(), 29),
+    to: new Date(),
+  });
+  const [activePreset, setActivePreset] = React.useState<DatePreset | 'custom'>("1m");
+
+  const handlePresetChange = (preset: DatePreset) => {
+    setActivePreset(preset);
+    const to = new Date();
+    switch (preset) {
+      case "1m":
+        setDateRange({ from: subMonths(to, 1), to });
+        break;
+      case "3m":
+        setDateRange({ from: subMonths(to, 3), to });
+        break;
+      case "6m":
+        setDateRange({ from: subMonths(to, 6), to });
+        break;
+      case "1y":
+        setDateRange({ from: subYears(to, 1), to });
+        break;
+    }
+  };
+
+  const handleDateRangeChange = (range: DateRange | undefined) => {
+    setDateRange(range);
+    setActivePreset('custom');
+  }
+
+  const filteredLeadsByDate = React.useMemo(() => {
+    if (!dateRange?.from) return allLeads;
+    // If only 'from' is selected, filter from that day onwards.
+    // If both are selected, filter within the range.
+    const toDate = dateRange.to ? new Date(dateRange.to).setHours(23, 59, 59, 999) : new Date().setHours(23, 59, 59, 999);
+    
+    return allLeads.filter(lead => {
+        const leadDate = new Date(lead.dateAdded).getTime();
+        const fromDate = new Date(dateRange.from!).setHours(0, 0, 0, 0);
+        return leadDate >= fromDate && leadDate <= toDate;
+    });
+  }, [allLeads, dateRange]);
+
   const leads = React.useMemo(() => {
     if (!currentUser) return [];
+    
+    const relevantLeads = filteredLeadsByDate;
+
     if (currentUser.role === 'Admin') {
-      return allLeads;
+      return relevantLeads;
     }
     if (currentUser.role === 'Manager') {
-      return allLeads.filter(lead => lead.state === currentUser.state);
+      return relevantLeads.filter(lead => lead.state === currentUser.state);
     }
     if (currentUser.role === 'Evaluator') {
-      return allLeads.filter(lead => lead.assignedUser?.id === currentUser.id);
+      return relevantLeads.filter(lead => lead.assignedUser?.id === currentUser.id);
     }
     return [];
-  }, [currentUser, allLeads]);
+  }, [currentUser, filteredLeadsByDate]);
 
   const users = React.useMemo(() => {
     if (!currentUser) return [];
@@ -120,13 +172,24 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <header>
-        <h1 className="text-3xl font-headline font-bold tracking-tight">
-          Analytics Dashboard
-        </h1>
-        <p className="text-muted-foreground">
-          Insights into your franchise lead pipeline performance.
-        </p>
+      <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+            <h1 className="text-3xl font-headline font-bold tracking-tight">
+            Analytics Dashboard
+            </h1>
+            <p className="text-muted-foreground">
+            Insights into your franchise lead pipeline performance.
+            </p>
+        </div>
+        <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 rounded-md bg-secondary p-1">
+                 <Button variant={activePreset === '1m' ? 'default' : 'ghost'} size="sm" onClick={() => handlePresetChange('1m')}>1M</Button>
+                 <Button variant={activePreset === '3m' ? 'default' : 'ghost'} size="sm" onClick={() => handlePresetChange('3m')}>3M</Button>
+                 <Button variant={activePreset === '6m' ? 'default' : 'ghost'} size="sm" onClick={() => handlePresetChange('6m')}>6M</Button>
+                 <Button variant={activePreset === '1y' ? 'default' : 'ghost'} size="sm" onClick={() => handlePresetChange('1y')}>1Y</Button>
+            </div>
+            <DateRangePicker date={dateRange} onDateChange={handleDateRangeChange} maxDays={31} />
+        </div>
       </header>
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         <Card>
