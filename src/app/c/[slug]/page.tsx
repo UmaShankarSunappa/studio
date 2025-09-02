@@ -65,8 +65,7 @@ export default function LeadCapturePage({ params }: { params: { slug: string } }
     if (!campaign) return;
 
     const now = new Date();
-    const newLead: Lead = {
-      id: uuidv4(),
+    const newLead: Omit<Lead, 'id'> = {
       name: data.name,
       email: `${data.name.toLowerCase().replace(/\s/g, ".")}@generated-email.com`, // Dummy email
       phone: data.phone,
@@ -78,13 +77,15 @@ export default function LeadCapturePage({ params }: { params: { slug: string } }
       statusHistory: [{ status: "New", date: now }],
       interactions: [{ type: "Campaign Form Submission", date: now, notes: `Lead from campaign: ${campaign.name}` }],
       notes: [],
-      // Dummy data for fields not in capture form
-      education: "Not specified",
-      previousExperience: "Not specified",
-      investmentCapacity: 0,
     };
+    
+    const leadWithId: Lead = {
+      id: uuidv4(),
+      ...newLead,
+    }
 
-    setLeads(prevLeads => [newLead, ...prevLeads]);
+
+    setLeads(prevLeads => [leadWithId, ...prevLeads]);
     setIsSubmitted(true);
   };
 

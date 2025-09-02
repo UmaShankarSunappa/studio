@@ -1,3 +1,4 @@
+
 import type { User, Lead, LeadSource, LeadStatus, Note, UserRole, UserState } from '@/types';
 
 export const allUsers: User[] = [
@@ -39,9 +40,11 @@ const names = [
   "Geeta Singh", "Anil Patel", "Rekha Sharma", "Sanjay Mehta", "Anita Desai"
 ];
 
-const educationLevels = ["Bachelor's Degree", "Master's Degree", "High School Diploma", "PhD", "MBA"];
-const businessExperience = ["0-2 years", "2-5 years", "5-10 years", "10+ years", "No experience"];
-const investmentCapacities = [50000, 75000, 100000, 150000, 200000];
+const investmentCapacities: Lead['investmentCapacity'][] = ["8–12", "12–15", "15–20"];
+const occupations = ["Business Owner", "Salaried Employee", "Doctor", "Software Engineer", "Government Employee"];
+const incomes = ["10-15 LPA", "15-20 LPA", "20-25 LPA", "25+ LPA"];
+const maritalStatuses: Lead['maritalStatus'][] = ["Married", "Single"];
+const qualifications = ["B.Pharm", "M.Pharm", "MBA", "B.Tech", "MBBS"];
 
 export const leads: Lead[] = Array.from({ length: 150 }, (_, i) => {
   const name = names[i % names.length];
@@ -94,6 +97,8 @@ export const leads: Lead[] = Array.from({ length: 150 }, (_, i) => {
           user: assignedUser
       })
   }
+  
+  const hasOtherBusinesses = i % 4 === 0;
 
   return {
     id: `lead-${i + 1}`,
@@ -106,9 +111,15 @@ export const leads: Lead[] = Array.from({ length: 150 }, (_, i) => {
     status: currentStatus,
     dateAdded: dateAdded,
     assignedUser: assignedUser,
-    education: educationLevels[i % educationLevels.length],
-    previousExperience: businessExperience[i % businessExperience.length],
-    investmentCapacity: investmentCapacities[i % investmentCapacities.length],
+    investmentCapacity: assignedUser ? investmentCapacities[i % investmentCapacities.length] : undefined,
+    franchiseeAge: assignedUser ? 30 + (i % 15) : undefined,
+    franchiseeOccupation: assignedUser ? occupations[i % occupations.length] : undefined,
+    franchiseeIncome: assignedUser ? incomes[i % incomes.length] : undefined,
+    maritalStatus: assignedUser ? maritalStatuses[i % maritalStatuses.length] : undefined,
+    qualification: assignedUser ? qualifications[i % qualifications.length] : undefined,
+    retailPharmacyExperience: assignedUser ? (i % 2 === 0) : undefined,
+    hasOtherBusinesses: assignedUser ? hasOtherBusinesses : undefined,
+    otherBusinessesDetails: assignedUser && hasOtherBusinesses ? 'Runs a small textile shop.' : undefined,
     statusHistory: statusHistory,
     interactions: interactions,
     notes: notes,

@@ -1,3 +1,4 @@
+
 export type LeadSource = "Newspaper" | "YouTube" | "Field Marketing" | "Website" | "Referral" | string; // Allow campaign names as sources
 
 export type LeadStatus =
@@ -55,10 +56,16 @@ export type Lead = {
   assignedUser?: User;
   phone: string;
   email: string;
-  // Form 2 Data
-  education: string;
-  previousExperience: string;
-  investmentCapacity: number;
+  // More Details
+  investmentCapacity?: '8–12' | '12–15' | '15–20';
+  franchiseeAge?: number;
+  franchiseeOccupation?: string;
+  franchiseeIncome?: string;
+  maritalStatus?: 'Married' | 'Single';
+  qualification?: string;
+  retailPharmacyExperience?: boolean;
+  hasOtherBusinesses?: boolean;
+  otherBusinessesDetails?: string;
   // Logs
   statusHistory: StatusHistory[];
   interactions: Interaction[];

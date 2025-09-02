@@ -1,3 +1,4 @@
+
 import * as React from 'react';
 import {
   Sheet,
@@ -31,8 +32,6 @@ import {
   Mail,
   MapPin,
   Briefcase,
-  DollarSign,
-  GraduationCap,
   History,
   MessageSquare,
   StickyNote,
@@ -43,7 +42,6 @@ import {
   PhoneOff,
   PhoneForwarded,
   PhoneCall,
-  Hash,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import type { Lead, LeadStatus, UserState, CallStatus } from '@/types';
@@ -72,12 +70,13 @@ import {
     FormLabel,
     FormMessage,
 } from "@/components/ui/form";
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Switch } from '@/components/ui/switch';
 
 
-const leadSources: LeadSource[] = ["Newspaper", "YouTube", "Field Marketing", "Website", "Referral"];
 const states: UserState[] = ["Telangana", "Tamil Nadu"];
-const educationLevels = ["Bachelor's Degree", "Master's Degree", "High School Diploma", "PhD", "MBA", "Other"];
-const businessExperience = ["0-2 years", "2-5 years", "5-10 years", "10+ years", "No experience"];
+const investmentCapacities = ["8–12", "12–15", "15–20"];
+const maritalStatuses = ["Married", "Single"];
 
 const leadEditSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters."),
@@ -85,9 +84,23 @@ const leadEditSchema = z.object({
   phone: z.string().regex(/^\d{10}$/, "Phone number must be 10 digits."),
   city: z.string().min(2, "City is required."),
   state: z.enum(["Telangana", "Tamil Nadu"]),
-  education: z.string().min(1, "Education level is required."),
-  previousExperience: z.string().min(1, "Business experience is required."),
-  investmentCapacity: z.coerce.number().min(1, "Investment capacity must be a positive number."),
+  investmentCapacity: z.enum(["8–12", "12–15", "15–20"]).optional(),
+  franchiseeAge: z.coerce.number().min(18, "Age must be at least 18.").max(100).optional(),
+  franchiseeOccupation: z.string().min(1, "Occupation is required.").optional(),
+  franchiseeIncome: z.string().min(1, "Income is required.").optional(),
+  maritalStatus: z.enum(["Married", "Single"]).optional(),
+  qualification: z.string().min(1, "Qualification is required.").optional(),
+  retailPharmacyExperience: z.enum(["Yes", "No"]).optional(),
+  hasOtherBusinesses: z.boolean().optional(),
+  otherBusinessesDetails: z.string().optional(),
+}).refine(data => {
+    if (data.hasOtherBusinesses && !data.otherBusinessesDetails) {
+        return false;
+    }
+    return true;
+}, {
+    message: "Please provide details about other businesses.",
+    path: ["otherBusinessesDetails"],
 });
 
 type LeadEditFormValues = z.infer<typeof leadEditSchema>;
@@ -125,17 +138,10 @@ export function LeadDetailSheet({
 
   const form = useForm<LeadEditFormValues>({
     resolver: zodResolver(leadEditSchema),
-    defaultValues: {
-      name: lead?.name,
-      email: lead?.email,
-      phone: lead?.phone,
-      city: lead?.city,
-      state: lead?.state,
-      education: lead?.education,
-      previousExperience: lead?.previousExperience,
-      investmentCapacity: lead?.investmentCapacity,
-    },
+    defaultValues: {},
   });
+  
+  const hasOtherBusinesses = form.watch("hasOtherBusinesses");
 
   React.useEffect(() => {
     if (lead) {
@@ -145,12 +151,18 @@ export function LeadDetailSheet({
         phone: lead.phone,
         city: lead.city,
         state: lead.state,
-        education: lead.education,
-        previousExperience: lead.previousExperience,
         investmentCapacity: lead.investmentCapacity,
+        franchiseeAge: lead.franchiseeAge,
+        franchiseeOccupation: lead.franchiseeOccupation,
+        franchiseeIncome: lead.franchiseeIncome,
+        maritalStatus: lead.maritalStatus,
+        qualification: lead.qualification,
+        retailPharmacyExperience: lead.retailPharmacyExperience ? 'Yes' : 'No',
+        hasOtherBusinesses: lead.hasOtherBusinesses,
+        otherBusinessesDetails: lead.otherBusinessesDetails,
       });
     }
-  }, [lead, form]);
+  }, [lead, form, isOpen]);
 
   const handleAddNote = () => {
     if (lead && note.trim()) {
@@ -178,7 +190,11 @@ export function LeadDetailSheet({
 
   const handleEditSubmit = (data: LeadEditFormValues) => {
     if (lead) {
-        onUpdateLead(lead.id, data);
+        const leadData = {
+          ...data,
+          retailPharmacyExperience: data.retailPharmacyExperience === 'Yes',
+        };
+        onUpdateLead(lead.id, leadData);
         setIsEditing(false);
     }
   };
@@ -186,6 +202,7 @@ export function LeadDetailSheet({
   if (!lead || !currentUser) return null;
 
   const isAssignedToCurrentUser = lead.assignedUser?.id === currentUser.id;
+  const isAssigned = !!lead.assignedUser;
   const callHistory = lead.interactions.filter(i => i.type === 'Call');
   const totalCalls = callHistory.length;
 
@@ -271,31 +288,10 @@ export function LeadDetailSheet({
                         <CardContent className="space-y-3 text-sm">
                           {isEditing ? (
                             <>
-                              <FormField
-                                control={form.control} name="email"
-                                render={({ field }) => ( <FormItem> <FormLabel>Email</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}
-                              />
-                               <FormField
-                                control={form.control} name="phone"
-                                render={({ field }) => ( <FormItem> <FormLabel>Phone</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}
-                              />
-                               <FormField
-                                control={form.control} name="city"
-                                render={({ field }) => ( <FormItem> <FormLabel>City</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )}
-                              />
-                               <FormField
-                                control={form.control} name="state"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>State</FormLabel>
-                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                            <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
-                                            <SelectContent>{states.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
-                                        </Select>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                               />
+                              <FormField control={form.control} name="email" render={({ field }) => ( <FormItem> <FormLabel>Email</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )} />
+                               <FormField control={form.control} name="phone" render={({ field }) => ( <FormItem> <FormLabel>Phone</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )} />
+                               <FormField control={form.control} name="city" render={({ field }) => ( <FormItem> <FormLabel>City</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )} />
+                               <FormField control={form.control} name="state" render={({ field }) => ( <FormItem> <FormLabel>State</FormLabel> <Select onValueChange={field.onChange} defaultValue={field.value}> <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl> <SelectContent>{states.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent> </Select> <FormMessage /> </FormItem> )} />
                             </>
                           ) : (
                             <>
@@ -306,30 +302,50 @@ export function LeadDetailSheet({
                           )}
                         </CardContent>
                       </Card>
-
-                      <Card>
-                        <CardHeader>
-                          <CardTitle className="flex items-center gap-2">
-                            <Briefcase className="w-5 h-5" />
-                            More details
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-4 text-sm">
-                            {isEditing ? (
-                                <>
-                                  <FormField control={form.control} name="education" render={({ field }) => (<FormItem> <FormLabel>Education</FormLabel> <Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl><SelectContent>{educationLevels.map(l => <SelectItem key={l} value={l}>{l}</SelectItem>)}</SelectContent></Select><FormMessage /></FormItem>)} />
-                                  <FormField control={form.control} name="previousExperience" render={({ field }) => (<FormItem> <FormLabel>Business Experience</FormLabel> <Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl><SelectContent>{businessExperience.map(e => <SelectItem key={e} value={e}>{e}</SelectItem>)}</SelectContent></Select><FormMessage /></FormItem>)} />
-                                  <FormField control={form.control} name="investmentCapacity" render={({ field }) => ( <FormItem> <FormLabel>Investment Capacity ($)</FormLabel> <FormControl><Input type="number" {...field} /></FormControl> <FormMessage /> </FormItem> )} />
-                                </>
-                            ) : (
-                                <>
-                                    <div className="flex items-start gap-3"> <GraduationCap className="w-4 h-4 text-muted-foreground mt-1 flex-shrink-0" /> <div> <p className="font-medium">Education</p> <p className="text-muted-foreground">{lead.education}</p> </div> </div>
-                                    <div className="flex items-start gap-3"> <Briefcase className="w-4 h-4 text-muted-foreground mt-1 flex-shrink-0" /> <div> <p className="font-medium">Business Experience</p> <p className="text-muted-foreground">{lead.previousExperience}</p> </div> </div>
-                                    <div className="flex items-start gap-3"> <DollarSign className="w-4 h-4 text-muted-foreground mt-1 flex-shrink-0" /> <div> <p className="font-medium">Investment Capacity</p> <p className="text-muted-foreground">${lead.investmentCapacity.toLocaleString()}</p> </div> </div>
-                                </>
-                            )}
-                        </CardContent>
-                      </Card>
+                      
+                      {isAssigned && (
+                        <Card>
+                          <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                              <Briefcase className="w-5 h-5" />
+                              More details
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent className="space-y-4 text-sm">
+                              {isEditing ? (
+                                  <>
+                                    <FormField control={form.control} name="investmentCapacity" render={({ field }) => ( <FormItem> <FormLabel>Investment Capacity (Lakhs)</FormLabel> <Select onValueChange={field.onChange} defaultValue={field.value}> <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl> <SelectContent>{investmentCapacities.map(l => <SelectItem key={l} value={l}>{l}</SelectItem>)}</SelectContent></Select><FormMessage /></FormItem> )} />
+                                    <FormField control={form.control} name="franchiseeAge" render={({ field }) => ( <FormItem> <FormLabel>Franchisee Age</FormLabel> <FormControl><Input type="number" {...field} /></FormControl> <FormMessage /> </FormItem> )} />
+                                    <FormField control={form.control} name="franchiseeOccupation" render={({ field }) => ( <FormItem> <FormLabel>Franchisee Occupation</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )} />
+                                    <FormField control={form.control} name="franchiseeIncome" render={({ field }) => ( <FormItem> <FormLabel>Franchisee Income</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )} />
+                                    <FormField control={form.control} name="maritalStatus" render={({ field }) => ( <FormItem> <FormLabel>Marital Status</FormLabel> <Select onValueChange={field.onChange} defaultValue={field.value}> <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl> <SelectContent>{maritalStatuses.map(e => <SelectItem key={e} value={e}>{e}</SelectItem>)}</SelectContent></Select><FormMessage /></FormItem> )} />
+                                    <FormField control={form.control} name="qualification" render={({ field }) => ( <FormItem> <FormLabel>Qualification</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )} />
+                                    <FormField control={form.control} name="retailPharmacyExperience" render={({ field }) => ( <FormItem> <FormLabel>Retail Pharmacy Experience?</FormLabel> <FormControl> <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex space-x-4"> <FormItem className="flex items-center space-x-2"> <FormControl> <RadioGroupItem value="Yes" /> </FormControl> <FormLabel className="font-normal">Yes</FormLabel> </FormItem> <FormItem className="flex items-center space-x-2"> <FormControl> <RadioGroupItem value="No" /> </FormControl> <FormLabel className="font-normal">No</FormLabel> </FormItem> </RadioGroup> </FormControl> <FormMessage /> </FormItem> )} />
+                                    <FormField control={form.control} name="hasOtherBusinesses" render={({ field }) => ( <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4"> <div> <FormLabel>Do you have other businesses?</FormLabel> </div> <FormControl> <Switch checked={field.value} onCheckedChange={field.onChange} /> </FormControl> </FormItem> )} />
+                                    {hasOtherBusinesses && (
+                                       <FormField control={form.control} name="otherBusinessesDetails" render={({ field }) => ( <FormItem> <FormLabel>Details of other businesses</FormLabel> <FormControl> <Textarea placeholder="Describe other businesses..." {...field} /> </FormControl> <FormMessage /> </FormItem> )}/>
+                                    )}
+                                  </>
+                              ) : (
+                                  <>
+                                      <div className="grid grid-cols-2 gap-4">
+                                        <div><p className="font-medium">Investment Capacity</p><p className="text-muted-foreground">{lead.investmentCapacity} Lakhs</p></div>
+                                        <div><p className="font-medium">Franchisee Age</p><p className="text-muted-foreground">{lead.franchiseeAge}</p></div>
+                                        <div><p className="font-medium">Franchisee Occupation</p><p className="text-muted-foreground">{lead.franchiseeOccupation}</p></div>
+                                        <div><p className="font-medium">Franchisee Income</p><p className="text-muted-foreground">{lead.franchiseeIncome}</p></div>
+                                        <div><p className="font-medium">Marital Status</p><p className="text-muted-foreground">{lead.maritalStatus}</p></div>
+                                        <div><p className="font-medium">Qualification</p><p className="text-muted-foreground">{lead.qualification}</p></div>
+                                        <div><p className="font-medium">Retail Pharmacy Experience</p><p className="text-muted-foreground">{lead.retailPharmacyExperience ? 'Yes' : 'No'}</p></div>
+                                        <div><p className="font-medium">Any Other Businesses?</p><p className="text-muted-foreground">{lead.hasOtherBusinesses ? 'Yes' : 'No'}</p></div>
+                                      </div>
+                                      {lead.hasOtherBusinesses && (
+                                        <div><p className="font-medium">Other Business Details</p><p className="text-muted-foreground">{lead.otherBusinessesDetails}</p></div>
+                                      )}
+                                  </>
+                              )}
+                          </CardContent>
+                        </Card>
+                      )}
                     </div>
 
                     {/* Column 2: Interactions & Notes */}
