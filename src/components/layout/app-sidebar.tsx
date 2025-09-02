@@ -1,3 +1,4 @@
+
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
@@ -49,7 +50,7 @@ export function AppSidebar() {
       <SidebarContent>
         <SidebarMenu>
           <SidebarMenuItem>
-            <Link href="/leads" legacyBehavior passHref>
+            <Link href="/leads">
               <SidebarMenuButton tooltip="Leads" isActive={isActive('/leads')} >
                 <Grip />
                 <span>Leads</span>
@@ -57,7 +58,7 @@ export function AppSidebar() {
             </Link>
           </SidebarMenuItem>
           <SidebarMenuItem>
-            <Link href="/dashboard" legacyBehavior passHref>
+            <Link href="/dashboard">
               <SidebarMenuButton tooltip="Dashboard" isActive={isActive('/dashboard')}>
                 <LayoutGrid />
                 <span>Dashboard</span>
@@ -67,7 +68,7 @@ export function AppSidebar() {
           {currentUser.role === 'Admin' && (
             <>
               <SidebarMenuItem>
-                <Link href="/users" legacyBehavior passHref>
+                <Link href="/users">
                   <SidebarMenuButton tooltip="Users" isActive={isActive('/users')}>
                     <Users />
                     <span>Users</span>
@@ -75,7 +76,7 @@ export function AppSidebar() {
                 </Link>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <Link href="/campaigns" legacyBehavior passHref>
+                <Link href="/campaigns">
                   <SidebarMenuButton tooltip="Campaigns" isActive={isActive('/campaigns')}>
                     <Megaphone />
                     <span>Campaigns</span>
