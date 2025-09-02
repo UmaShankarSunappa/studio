@@ -328,18 +328,18 @@ export function LeadDetailSheet({
                                   </>
                               ) : (
                                   <>
-                                      <div className="grid grid-cols-2 gap-4">
-                                        <div><p className="font-medium">Investment Capacity</p><p className="text-muted-foreground">{lead.investmentCapacity} Lakhs</p></div>
-                                        <div><p className="font-medium">Franchisee Age</p><p className="text-muted-foreground">{lead.franchiseeAge}</p></div>
-                                        <div><p className="font-medium">Franchisee Occupation</p><p className="text-muted-foreground">{lead.franchiseeOccupation}</p></div>
-                                        <div><p className="font-medium">Franchisee Income</p><p className="text-muted-foreground">{lead.franchiseeIncome}</p></div>
-                                        <div><p className="font-medium">Marital Status</p><p className="text-muted-foreground">{lead.maritalStatus}</p></div>
-                                        <div><p className="font-medium">Qualification</p><p className="text-muted-foreground">{lead.qualification}</p></div>
-                                        <div><p className="font-medium">Retail Pharmacy Experience</p><p className="text-muted-foreground">{lead.retailPharmacyExperience ? 'Yes' : 'No'}</p></div>
-                                        <div><p className="font-medium">Any Other Businesses?</p><p className="text-muted-foreground">{lead.hasOtherBusinesses ? 'Yes' : 'No'}</p></div>
+                                      <div className="grid grid-cols-2 gap-y-4 gap-x-2">
+                                        <div><p className="font-medium">Investment Capacity</p><p className="text-muted-foreground">{lead.investmentCapacity ? `${lead.investmentCapacity} Lakhs` : '-'}</p></div>
+                                        <div><p className="font-medium">Franchisee Age</p><p className="text-muted-foreground">{lead.franchiseeAge || '-'}</p></div>
+                                        <div><p className="font-medium">Franchisee Occupation</p><p className="text-muted-foreground">{lead.franchiseeOccupation || '-'}</p></div>
+                                        <div><p className="font-medium">Franchisee Income</p><p className="text-muted-foreground">{lead.franchiseeIncome || '-'}</p></div>
+                                        <div><p className="font-medium">Marital Status</p><p className="text-muted-foreground">{lead.maritalStatus || '-'}</p></div>
+                                        <div><p className="font-medium">Qualification</p><p className="text-muted-foreground">{lead.qualification || '-'}</p></div>
+                                        <div><p className="font-medium">Retail Pharmacy Experience</p><p className="text-muted-foreground">{lead.retailPharmacyExperience === undefined ? '-' : (lead.retailPharmacyExperience ? 'Yes' : 'No')}</p></div>
+                                        <div><p className="font-medium">Any Other Businesses?</p><p className="text-muted-foreground">{lead.hasOtherBusinesses === undefined ? '-' : (lead.hasOtherBusinesses ? 'Yes' : 'No')}</p></div>
                                       </div>
                                       {lead.hasOtherBusinesses && (
-                                        <div><p className="font-medium">Other Business Details</p><p className="text-muted-foreground">{lead.otherBusinessesDetails}</p></div>
+                                        <div className="pt-2"><p className="font-medium">Other Business Details</p><p className="text-muted-foreground">{lead.otherBusinessesDetails || '-'}</p></div>
                                       )}
                                   </>
                               )}
