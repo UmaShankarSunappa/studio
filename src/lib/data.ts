@@ -28,11 +28,9 @@ export const leadStatuses: LeadStatus[] = [
 ];
 
 const leadSources: LeadSource[] = ["Newspaper", "YouTube", "Field Marketing", "Website", "Referral"];
-const cities = [
-  { name: "Hyderabad", state: "Telangana" as const }, { name: "Warangal", state: "Telangana" as const },
-  { name: "Chennai", state: "Tamil Nadu" as const }, { name: "Madurai", state: "Tamil Nadu" as const },
-  { name: "Coimbatore", state: "Tamil Nadu" as const }, { name: "Nizamabad", state: "Telangana" as const }
-];
+const telanganaCities = ["Hyderabad", "Warangal", "Nizamabad", "Karimnagar"];
+const tamilNaduCities = ["Chennai", "Coimbatore", "Madurai", "Tiruchirappalli"];
+
 const names = [
   "Rohan Sharma", "Priya Patel", "Amit Singh", "Anjali Mehta", "Vikram Kumar",
   "Sneha Reddy", "Rajesh Gupta", "Pooja Desai", "Arun Verma", "Deepika Iyer",
@@ -46,9 +44,14 @@ const incomes = ["10-15 LPA", "15-20 LPA", "20-25 LPA", "25+ LPA"];
 const maritalStatuses: Lead['maritalStatus'][] = ["Married", "Single"];
 const qualifications = ["B.Pharm", "M.Pharm", "MBA", "B.Tech", "MBBS"];
 
-export const leads: Lead[] = Array.from({ length: 150 }, (_, i) => {
+export const leads: Lead[] = Array.from({ length: 100 }, (_, i) => {
+  const isTelangana = i < 50;
+  const state: "Telangana" | "Tamil Nadu" = isTelangana ? "Telangana" : "Tamil Nadu";
+  const city = isTelangana 
+    ? telanganaCities[i % telanganaCities.length]
+    : tamilNaduCities[i % tamilNaduCities.length];
+  
   const name = names[i % names.length];
-  const cityInfo = cities[i % cities.length];
   const dateAdded = new Date(new Date().setDate(new Date().getDate() - i * 2));
   
   const assignableStatuses = leadStatuses.filter(s => s !== "Not Interested" && s !== "Converted");
@@ -59,25 +62,21 @@ export const leads: Lead[] = Array.from({ length: 150 }, (_, i) => {
   const statusesRequiringAssignment: LeadStatus[] = ['WhatsApp - Delivery Failed', 'Form 2 - Submitted', 'Form 2 - No Response', 'Form 2 - Pending'];
   const initialStatuses: LeadStatus[] = ['New', 'WhatsApp - Sent'];
   
-  const evaluatorsInState = allUsers.filter(u => u.role === 'Evaluator' && u.state === cityInfo.state);
+  const evaluatorsInState = allUsers.filter(u => u.role === 'Evaluator' && u.state === state);
 
-  // If status is past initial stages and NOT one that shows the "Assign" button, it should be pre-assigned.
   if (!initialStatuses.includes(currentStatus) && !statusesRequiringAssignment.includes(currentStatus)) {
     if (evaluatorsInState.length > 0) {
         assignedUser = evaluatorsInState[i % evaluatorsInState.length];
     }
   } else if (statusesRequiringAssignment.includes(currentStatus)) {
-    // For statuses that should show the "Assign" button, let's make some of them unassigned.
     if (i % 3 !== 0) {
-        // Leave it unassigned (assignedUser remains undefined)
+        // Leave it unassigned
     } else {
-        // Pre-assign some of them anyway for variety
         if (evaluatorsInState.length > 0) {
             assignedUser = evaluatorsInState[i % evaluatorsInState.length];
         }
     }
   }
-  // For initialStatuses, assignedUser remains undefined.
 
   const statusHistory = [{ status: "New" as LeadStatus, date: new Date(dateAdded.getTime() - 86400000) }];
   if (currentStatus !== "New") {
@@ -105,8 +104,8 @@ export const leads: Lead[] = Array.from({ length: 150 }, (_, i) => {
     name: name,
     email: `${name.toLowerCase().replace(' ', '.')}@example.com`,
     phone: `9876543${(21 + i).toString().padStart(3, '0')}`,
-    city: cityInfo.name,
-    state: cityInfo.state,
+    city: city,
+    state: state,
     source: leadSources[i % leadSources.length],
     status: currentStatus,
     dateAdded: dateAdded,
