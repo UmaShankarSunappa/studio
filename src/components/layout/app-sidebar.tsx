@@ -12,6 +12,7 @@ import {
   SidebarMenuButton,
   SidebarContent,
   SidebarFooter,
+  SidebarMenuSkeleton,
 } from "@/components/ui/sidebar";
 import { FranchiseFlowLogo } from "@/components/icons";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -23,17 +24,13 @@ import { useAuth } from "@/hooks/use-auth";
 export function AppSidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  const { user: currentUser, logout } = useAuth();
+  const { user: currentUser, logout, loading } = useAuth();
 
 
   const handleLogout = () => {
     logout();
     router.push('/login');
   };
-
-  if (!currentUser) {
-    return null; // Or a loading spinner
-  }
 
   const isActive = (path: string) => {
     return pathname === path;
@@ -49,46 +46,56 @@ export function AppSidebar() {
       </SidebarHeader>
       <SidebarContent>
         <SidebarMenu>
-          <SidebarMenuItem>
-            <Link href="/leads">
-              <SidebarMenuButton tooltip="Leads" isActive={isActive('/leads')} >
-                <Grip />
-                <span>Leads</span>
-              </SidebarMenuButton>
-            </Link>
-          </SidebarMenuItem>
-          <SidebarMenuItem>
-            <Link href="/dashboard">
-              <SidebarMenuButton tooltip="Dashboard" isActive={isActive('/dashboard')}>
-                <LayoutGrid />
-                <span>Dashboard</span>
-              </SidebarMenuButton>
-            </Link>
-          </SidebarMenuItem>
-          {currentUser.role === 'Admin' && (
+          {loading ? (
+            <>
+                <SidebarMenuSkeleton showIcon />
+                <SidebarMenuSkeleton showIcon />
+            </>
+          ) : (
             <>
               <SidebarMenuItem>
-                <Link href="/users">
-                  <SidebarMenuButton tooltip="Users" isActive={isActive('/users')}>
-                    <Users />
-                    <span>Users</span>
+                <Link href="/leads">
+                  <SidebarMenuButton tooltip="Leads" isActive={isActive('/leads')} >
+                    <Grip />
+                    <span>Leads</span>
                   </SidebarMenuButton>
                 </Link>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <Link href="/campaigns">
-                  <SidebarMenuButton tooltip="Campaigns" isActive={isActive('/campaigns')}>
-                    <Megaphone />
-                    <span>Campaigns</span>
+                <Link href="/dashboard">
+                  <SidebarMenuButton tooltip="Dashboard" isActive={isActive('/dashboard')}>
+                    <LayoutGrid />
+                    <span>Dashboard</span>
                   </SidebarMenuButton>
                 </Link>
               </SidebarMenuItem>
+              {currentUser?.role === 'Admin' && (
+                <>
+                  <SidebarMenuItem>
+                    <Link href="/users">
+                      <SidebarMenuButton tooltip="Users" isActive={isActive('/users')}>
+                        <Users />
+                        <span>Users</span>
+                      </SidebarMenuButton>
+                    </Link>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <Link href="/campaigns">
+                      <SidebarMenuButton tooltip="Campaigns" isActive={isActive('/campaigns')}>
+                        <Megaphone />
+                        <span>Campaigns</span>
+                      </SidebarMenuButton>
+                    </Link>
+                  </SidebarMenuItem>
+                </>
+              )}
             </>
           )}
         </SidebarMenu>
       </SidebarContent>
       <SidebarFooter>
-      <DropdownMenu>
+      {!loading && currentUser && (
+        <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="justify-start gap-3 w-full p-2 h-auto">
                 <Avatar className="h-8 w-8">
@@ -121,6 +128,7 @@ export function AppSidebar() {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+        )}
       </SidebarFooter>
     </>
   );
