@@ -18,14 +18,12 @@ import {
 interface DateRangePickerProps extends React.HTMLAttributes<HTMLDivElement> {
   date: DateRange | undefined;
   onDateChange: (date: DateRange | undefined) => void;
-  maxDays?: number;
 }
 
 export function DateRangePicker({
   className,
   date,
   onDateChange,
-  maxDays,
 }: DateRangePickerProps) {
 
   return (
@@ -63,17 +61,11 @@ export function DateRangePicker({
             selected={date}
             onSelect={onDateChange}
             numberOfMonths={2}
-            disabled={maxDays ? (d) => {
-                if(date?.from && !date.to) {
-                    const diff = Math.abs(d.getTime() - date.from.getTime());
-                    const diffDays = Math.ceil(diff / (1000 * 60 * 60 * 24));
-                    return diffDays > maxDays;
-                }
-                return false;
-            } : undefined}
           />
         </PopoverContent>
       </Popover>
     </div>
   )
 }
+
+    

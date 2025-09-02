@@ -15,9 +15,8 @@ import {
   Loader2,
   Phone,
 } from "lucide-react";
-import { format, subMonths, subYears } from "date-fns";
+import { format } from "date-fns";
 import { v4 as uuidv4 } from 'uuid';
-import { DateRange } from "react-day-picker";
 
 import type { Lead, LeadSource, LeadStatus, User as UserType, Interaction, CallStatus } from "@/types";
 import { leadStatuses } from "@/lib/data";
@@ -47,9 +46,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { MultiSelect } from "@/components/ui/multi-select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { DateRangePicker } from "@/components/ui/date-range-picker";
-
-type DatePreset = "1m" | "3m" | "6m" | "1y";
 
 const statusColors: Record<LeadStatus, string> = {
   "New": "bg-blue-100 text-blue-800",
@@ -93,37 +89,8 @@ export default function LeadsPage() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = React.useState(false);
   const [isCallDialogOpen, setIsCallDialogOpen] = React.useState(false);
   const [selectedLeadIds, setSelectedLeadIds] = React.useState<string[]>([]);
-  const [dateRange, setDateRange] = React.useState<DateRange | undefined>({
-    from: subYears(new Date(), 1),
-    to: new Date(),
-  });
-  const [activePreset, setActivePreset] = React.useState<DatePreset | 'custom'>("1y");
 
   const currentUser = user!;
-
-  const handlePresetChange = (preset: DatePreset) => {
-    setActivePreset(preset);
-    const to = new Date();
-    switch (preset) {
-      case "1m":
-        setDateRange({ from: subMonths(to, 1), to });
-        break;
-      case "3m":
-        setDateRange({ from: subMonths(to, 3), to });
-        break;
-      case "6m":
-        setDateRange({ from: subMonths(to, 6), to });
-        break;
-      case "1y":
-        setDateRange({ from: subYears(to, 1), to });
-        break;
-    }
-  };
-
-  const handleDateRangeChange = (range: DateRange | undefined) => {
-    setDateRange(range);
-    setActivePreset('custom');
-  }
 
   const handleAssign = (leadId: string, userToAssign: UserType) => {
     setLeads((prevLeads) =>
@@ -283,16 +250,7 @@ export default function LeadsPage() {
   const filteredLeads = React.useMemo(() => {
     if (!currentUser) return [];
     
-    // Date filtering first
-    const leadsInDateRange = leads.filter(lead => {
-        if (!dateRange?.from) return true;
-        const toDate = dateRange.to ? new Date(dateRange.to).setHours(23, 59, 59, 999) : new Date().setHours(23, 59, 59, 999);
-        const leadDate = new Date(lead.dateAdded).getTime();
-        const fromDate = new Date(dateRange.from!).setHours(0, 0, 0, 0);
-        return leadDate >= fromDate && leadDate <= toDate;
-    });
-
-    return leadsInDateRange.filter((lead) => {
+    return leads.filter((lead) => {
       // Role-based filtering
       if (currentUser.role === 'Manager') {
         if (lead.state !== currentUser.state) return false;
@@ -317,7 +275,7 @@ export default function LeadsPage() {
         filters.status.length === 0 || filters.status.includes(lead.status);
       return matchesSearch && matchesSource && matchesStatus;
     });
-  }, [leads, filters, currentUser, dateRange]);
+  }, [leads, filters, currentUser]);
 
   const evaluators = React.useMemo(() => allUsers.filter(u => u.role === 'Evaluator'), [allUsers]);
 
@@ -404,7 +362,7 @@ export default function LeadsPage() {
                     </DropdownMenu>
                   )}
               </div>
-              <div className="flex flex-col gap-2 md:flex-row md:items-center flex-wrap">
+              <div className="flex flex-col gap-2 md:flex-row md:items-center">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
@@ -434,13 +392,6 @@ export default function LeadsPage() {
                     onChange={(selected) => setFilters(prev => ({ ...prev, status: selected as LeadStatus[] }))}
                     placeholder="Filter by status..."
                 />
-                 <div className="flex items-center gap-1 rounded-md bg-secondary p-1">
-                     <Button variant={activePreset === '1m' ? 'default' : 'ghost'} size="sm" onClick={() => handlePresetChange('1m')}>1M</Button>
-                     <Button variant={activePreset === '3m' ? 'default' : 'ghost'} size="sm" onClick={() => handlePresetChange('3m')}>3M</Button>
-                     <Button variant={activePreset === '6m' ? 'default' : 'ghost'} size="sm" onClick={() => handlePresetChange('6m')}>6M</Button>
-                     <Button variant={activePreset === '1y' ? 'default' : 'ghost'} size="sm" onClick={() => handlePresetChange('1y')}>1Y</Button>
-                </div>
-                <DateRangePicker date={dateRange} onDateChange={handleDateRangeChange} maxDays={31} />
                 <Button onClick={() => setIsCreateDialogOpen(true)}>
                     <PlusCircle className="mr-2 h-4 w-4" />
                     Create
@@ -600,3 +551,5 @@ export default function LeadsPage() {
     </>
   );
 }
+
+    
