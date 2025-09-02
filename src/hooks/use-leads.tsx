@@ -44,7 +44,9 @@ export const LeadProvider = ({ children }: { children: ReactNode }) => {
       }
       
       setLeads(leadsToLoad);
-      localStorage.setItem('allLeads', JSON.stringify(leadsToLoad));
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('allLeads', JSON.stringify(leadsToLoad));
+      }
 
     } catch (error) {
       console.error("Failed to load or parse leads from localStorage", error);
@@ -57,7 +59,9 @@ export const LeadProvider = ({ children }: { children: ReactNode }) => {
   const handleSetLeads = (newLeadsState: React.SetStateAction<Lead[]>) => {
     setLeads(prevState => {
         const newState = typeof newLeadsState === 'function' ? newLeadsState(prevState) : newLeadsState;
-        localStorage.setItem('allLeads', JSON.stringify(newState));
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('allLeads', JSON.stringify(newState));
+        }
         return newState;
     });
   };
