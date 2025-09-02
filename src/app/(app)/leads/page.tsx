@@ -95,7 +95,20 @@ export default function LeadsPage() {
   const handleAssign = (leadId: string, userToAssign: UserType) => {
     setLeads((prevLeads) =>
       prevLeads.map((lead) =>
-        lead.id === leadId ? { ...lead, assignedUser: userToAssign } : lead
+        lead.id === leadId ? { 
+            ...lead, 
+            assignedUser: userToAssign,
+            // Populate details on assignment
+            investmentCapacity: '12–15',
+            franchiseeAge: 36,
+            franchiseeOccupation: 'Business Owner',
+            franchiseeIncome: '18 Lakhs per annum',
+            maritalStatus: 'Married',
+            qualification: 'B.Pharm',
+            retailPharmacyExperience: true,
+            hasOtherBusinesses: true,
+            otherBusinessesDetails: 'Yes – Owns a medical distribution shop',
+        } : lead
       )
     );
     toast({
@@ -108,7 +121,20 @@ export default function LeadsPage() {
     setLeads(prevLeads =>
       prevLeads.map(lead =>
         selectedLeadIds.includes(lead.id)
-          ? { ...lead, assignedUser: userToAssign }
+          ? { 
+              ...lead, 
+              assignedUser: userToAssign,
+              // Populate details on assignment
+              investmentCapacity: '12–15',
+              franchiseeAge: 36,
+              franchiseeOccupation: 'Business Owner',
+              franchiseeIncome: '18 Lakhs per annum',
+              maritalStatus: 'Married',
+              qualification: 'B.Pharm',
+              retailPharmacyExperience: true,
+              hasOtherBusinesses: true,
+              otherBusinessesDetails: 'Yes – Owns a medical distribution shop',
+            }
           : lead
       )
     );
@@ -426,7 +452,7 @@ export default function LeadsPage() {
                 </thead>
                 <tbody>
                   {filteredLeads.map((lead) => {
-                    const SourceIcon = sourceIcons[lead.source];
+                    const SourceIcon = sourceIcons[lead.source] || Share2;
                     const canBeAssigned = assignableStatuses.includes(lead.status) && !lead.assignedUser;
                     
                     const assignableEvaluators = getAssignableEvaluators(lead);
@@ -551,5 +577,3 @@ export default function LeadsPage() {
     </>
   );
 }
-
-    

@@ -86,10 +86,10 @@ const leadEditSchema = z.object({
   state: z.enum(["Telangana", "Tamil Nadu"]),
   investmentCapacity: z.enum(["8–12", "12–15", "15–20"]).optional(),
   franchiseeAge: z.coerce.number().min(18, "Age must be at least 18.").max(100).optional(),
-  franchiseeOccupation: z.string().min(1, "Occupation is required.").optional(),
-  franchiseeIncome: z.string().min(1, "Income is required.").optional(),
+  franchiseeOccupation: z.string().optional(),
+  franchiseeIncome: z.string().optional(),
   maritalStatus: z.enum(["Married", "Single"]).optional(),
-  qualification: z.string().min(1, "Qualification is required.").optional(),
+  qualification: z.string().optional(),
   retailPharmacyExperience: z.enum(["Yes", "No"]).optional(),
   hasOtherBusinesses: z.boolean().optional(),
   otherBusinessesDetails: z.string().optional(),
@@ -112,7 +112,7 @@ interface LeadDetailSheetProps {
   onOpenChange: (isOpen: boolean) => void;
   onAddNote: (leadId: string, noteText: string) => void;
   onUpdateStatus: (leadId: string, status: LeadStatus, remarks?: string) => void;
-  onUpdateLead: (leadId: string, data: LeadEditFormValues) => void;
+  onUpdateLead: (leadId: string, data: Partial<Omit<Lead, 'id'>>) => void;
 }
 
 const callStatusIcons: Record<CallStatus, React.ElementType> = {
@@ -138,7 +138,22 @@ export function LeadDetailSheet({
 
   const form = useForm<LeadEditFormValues>({
     resolver: zodResolver(leadEditSchema),
-    defaultValues: {},
+    defaultValues: {
+        name: "",
+        email: "",
+        phone: "",
+        city: "",
+        state: "Telangana",
+        investmentCapacity: undefined,
+        franchiseeAge: 0,
+        franchiseeOccupation: "",
+        franchiseeIncome: "",
+        maritalStatus: undefined,
+        qualification: "",
+        retailPharmacyExperience: undefined,
+        hasOtherBusinesses: false,
+        otherBusinessesDetails: "",
+    },
   });
   
   const hasOtherBusinesses = form.watch("hasOtherBusinesses");
@@ -152,14 +167,14 @@ export function LeadDetailSheet({
         city: lead.city,
         state: lead.state,
         investmentCapacity: lead.investmentCapacity,
-        franchiseeAge: lead.franchiseeAge,
-        franchiseeOccupation: lead.franchiseeOccupation,
-        franchiseeIncome: lead.franchiseeIncome,
+        franchiseeAge: lead.franchiseeAge || 0,
+        franchiseeOccupation: lead.franchiseeOccupation || "",
+        franchiseeIncome: lead.franchiseeIncome || "",
         maritalStatus: lead.maritalStatus,
-        qualification: lead.qualification,
-        retailPharmacyExperience: lead.retailPharmacyExperience ? 'Yes' : 'No',
-        hasOtherBusinesses: lead.hasOtherBusinesses,
-        otherBusinessesDetails: lead.otherBusinessesDetails,
+        qualification: lead.qualification || "",
+        retailPharmacyExperience: lead.retailPharmacyExperience ? 'Yes' : (lead.retailPharmacyExperience === false ? 'No' : undefined),
+        hasOtherBusinesses: lead.hasOtherBusinesses || false,
+        otherBusinessesDetails: lead.otherBusinessesDetails || "",
       });
     }
   }, [lead, form, isOpen]);
@@ -192,6 +207,7 @@ export function LeadDetailSheet({
     if (lead) {
         const leadData = {
           ...data,
+          franchiseeAge: data.franchiseeAge || undefined,
           retailPharmacyExperience: data.retailPharmacyExperience === 'Yes',
         };
         onUpdateLead(lead.id, leadData);
@@ -229,7 +245,7 @@ export function LeadDetailSheet({
                       360-Degree Lead Profile
                     </SheetDescription>
                 </div>
-                {!isEditing && (
+                {!isEditing && isAssigned && (
                     <Button variant="outline" size="icon" onClick={() => setIsEditing(true)}>
                         <Pencil className="h-4 w-4" />
                         <span className="sr-only">Edit Lead</span>
@@ -314,16 +330,16 @@ export function LeadDetailSheet({
                           <CardContent className="space-y-4 text-sm">
                               {isEditing ? (
                                   <>
-                                    <FormField control={form.control} name="investmentCapacity" render={({ field }) => ( <FormItem> <FormLabel>Investment Capacity (Lakhs)</FormLabel> <Select onValueChange={field.onChange} defaultValue={field.value}> <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl> <SelectContent>{investmentCapacities.map(l => <SelectItem key={l} value={l}>{l}</SelectItem>)}</SelectContent></Select><FormMessage /></FormItem> )} />
-                                    <FormField control={form.control} name="franchiseeAge" render={({ field }) => ( <FormItem> <FormLabel>Franchisee Age</FormLabel> <FormControl><Input type="number" {...field} /></FormControl> <FormMessage /> </FormItem> )} />
-                                    <FormField control={form.control} name="franchiseeOccupation" render={({ field }) => ( <FormItem> <FormLabel>Franchisee Occupation</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )} />
-                                    <FormField control={form.control} name="franchiseeIncome" render={({ field }) => ( <FormItem> <FormLabel>Franchisee Income</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )} />
-                                    <FormField control={form.control} name="maritalStatus" render={({ field }) => ( <FormItem> <FormLabel>Marital Status</FormLabel> <Select onValueChange={field.onChange} defaultValue={field.value}> <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl> <SelectContent>{maritalStatuses.map(e => <SelectItem key={e} value={e}>{e}</SelectItem>)}</SelectContent></Select><FormMessage /></FormItem> )} />
-                                    <FormField control={form.control} name="qualification" render={({ field }) => ( <FormItem> <FormLabel>Qualification</FormLabel> <FormControl><Input {...field} /></FormControl> <FormMessage /> </FormItem> )} />
-                                    <FormField control={form.control} name="retailPharmacyExperience" render={({ field }) => ( <FormItem> <FormLabel>Retail Pharmacy Experience?</FormLabel> <FormControl> <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex space-x-4"> <FormItem className="flex items-center space-x-2"> <FormControl> <RadioGroupItem value="Yes" /> </FormControl> <FormLabel className="font-normal">Yes</FormLabel> </FormItem> <FormItem className="flex items-center space-x-2"> <FormControl> <RadioGroupItem value="No" /> </FormControl> <FormLabel className="font-normal">No</FormLabel> </FormItem> </RadioGroup> </FormControl> <FormMessage /> </FormItem> )} />
+                                    <FormField control={form.control} name="investmentCapacity" render={({ field }) => ( <FormItem> <FormLabel>Investment Capacity (Lakhs)</FormLabel> <Select onValueChange={field.onChange} value={field.value}> <FormControl><SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger></FormControl> <SelectContent>{investmentCapacities.map(l => <SelectItem key={l} value={l}>{l}</SelectItem>)}</SelectContent></Select><FormMessage /></FormItem> )} />
+                                    <FormField control={form.control} name="franchiseeAge" render={({ field }) => ( <FormItem> <FormLabel>Franchisee Age</FormLabel> <FormControl><Input type="number" {...field} value={field.value || ''} /></FormControl> <FormMessage /> </FormItem> )} />
+                                    <FormField control={form.control} name="franchiseeOccupation" render={({ field }) => ( <FormItem> <FormLabel>Franchisee Occupation</FormLabel> <FormControl><Input {...field} value={field.value || ''} /></FormControl> <FormMessage /> </FormItem> )} />
+                                    <FormField control={form.control} name="franchiseeIncome" render={({ field }) => ( <FormItem> <FormLabel>Franchisee Income</FormLabel> <FormControl><Input {...field} value={field.value || ''} /></FormControl> <FormMessage /> </FormItem> )} />
+                                    <FormField control={form.control} name="maritalStatus" render={({ field }) => ( <FormItem> <FormLabel>Marital Status</FormLabel> <Select onValueChange={field.onChange} value={field.value}> <FormControl><SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger></FormControl> <SelectContent>{maritalStatuses.map(e => <SelectItem key={e} value={e}>{e}</SelectItem>)}</SelectContent></Select><FormMessage /></FormItem> )} />
+                                    <FormField control={form.control} name="qualification" render={({ field }) => ( <FormItem> <FormLabel>Qualification</FormLabel> <FormControl><Input {...field} value={field.value || ''} /></FormControl> <FormMessage /> </FormItem> )} />
+                                    <FormField control={form.control} name="retailPharmacyExperience" render={({ field }) => ( <FormItem> <FormLabel>Retail Pharmacy Experience?</FormLabel> <FormControl> <RadioGroup onValueChange={field.onChange} value={field.value} className="flex space-x-4"> <FormItem className="flex items-center space-x-2"> <FormControl> <RadioGroupItem value="Yes" /> </FormControl> <FormLabel className="font-normal">Yes</FormLabel> </FormItem> <FormItem className="flex items-center space-x-2"> <FormControl> <RadioGroupItem value="No" /> </FormControl> <FormLabel className="font-normal">No</FormLabel> </FormItem> </RadioGroup> </FormControl> <FormMessage /> </FormItem> )} />
                                     <FormField control={form.control} name="hasOtherBusinesses" render={({ field }) => ( <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4"> <div> <FormLabel>Do you have other businesses?</FormLabel> </div> <FormControl> <Switch checked={field.value} onCheckedChange={field.onChange} /> </FormControl> </FormItem> )} />
                                     {hasOtherBusinesses && (
-                                       <FormField control={form.control} name="otherBusinessesDetails" render={({ field }) => ( <FormItem> <FormLabel>Details of other businesses</FormLabel> <FormControl> <Textarea placeholder="Describe other businesses..." {...field} /> </FormControl> <FormMessage /> </FormItem> )}/>
+                                       <FormField control={form.control} name="otherBusinessesDetails" render={({ field }) => ( <FormItem> <FormLabel>Details of other businesses</FormLabel> <FormControl> <Textarea placeholder="Describe other businesses..." {...field} value={field.value || ''} /> </FormControl> <FormMessage /> </FormItem> )}/>
                                     )}
                                   </>
                               ) : (
@@ -399,7 +415,7 @@ export function LeadDetailSheet({
                               <div key={index} className="text-sm bg-secondary p-3 rounded-md"> <p className="font-medium">{note.user.name}</p> <p className="text-xs text-muted-foreground mb-1">{format(new Date(note.date), 'MMM d, yyyy h:mm a')}</p> <p className="text-muted-foreground">{note.text}</p> </div>
                             ))}
                           </div>
-                          {!isEditing && (
+                          {!isEditing && isAssigned &&(
                               <>
                                 <Separator />
                                 <div className="space-y-2">
