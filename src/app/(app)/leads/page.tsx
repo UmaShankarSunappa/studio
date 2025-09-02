@@ -431,7 +431,7 @@ export default function LeadsPage() {
                 <thead className="text-left text-muted-foreground">
                   <tr className="border-b">
                     {showCheckboxes && (
-                      <th className="p-4 font-medium">
+                      <th className="p-4 font-medium w-12">
                         <Checkbox
                           checked={selectedLeadIds.length > 0 && selectedLeadIds.length === assignableLeads.length}
                           onCheckedChange={handleSelectAll}
@@ -466,7 +466,7 @@ export default function LeadsPage() {
                         data-selected={selectedLeadIds.includes(lead.id)}
                       >
                          {showCheckboxes && (
-                          <td className="p-4">
+                          <td className="p-4 align-middle">
                             {isSelectable ? (
                                <Checkbox
                                 checked={selectedLeadIds.includes(lead.id)}
