@@ -245,12 +245,6 @@ export function LeadDetailSheet({
                             360-Degree Lead Profile
                           </SheetDescription>
                       </div>
-                      {!isEditing && isAssigned && (
-                          <Button variant="outline" size="icon" onClick={() => setIsEditing(true)}>
-                              <Pencil className="h-4 w-4" />
-                              <span className="sr-only">Edit Lead</span>
-                          </Button>
-                      )}
                   </div>
                 </SheetHeader>
                 <Form {...form}>
