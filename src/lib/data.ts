@@ -91,6 +91,30 @@ export const leads: Lead[] = Array.from({ length: 100 }, (_, i) => {
       })
   }
   
+  const moreDetails = assignedUser
+    ? {
+        investmentCapacity: '12–15' as const,
+        franchiseeAge: 36,
+        franchiseeOccupation: 'Business Owner',
+        franchiseeIncome: '18 Lakhs per annum',
+        maritalStatus: 'Married' as const,
+        qualification: 'B.Pharm',
+        retailPharmacyExperience: true,
+        hasOtherBusinesses: true,
+        otherBusinessesDetails: 'Yes – Owns a medical distribution shop',
+      }
+    : {
+        investmentCapacity: undefined,
+        franchiseeAge: undefined,
+        franchiseeOccupation: undefined,
+        franchiseeIncome: undefined,
+        maritalStatus: undefined,
+        qualification: undefined,
+        retailPharmacyExperience: undefined,
+        hasOtherBusinesses: undefined,
+        otherBusinessesDetails: undefined,
+      };
+      
   return {
     id: `lead-${i + 1}`,
     name: name,
@@ -102,15 +126,7 @@ export const leads: Lead[] = Array.from({ length: 100 }, (_, i) => {
     status: currentStatus,
     dateAdded: dateAdded,
     assignedUser: assignedUser,
-    investmentCapacity: assignedUser ? '12–15' : undefined,
-    franchiseeAge: assignedUser ? 36 : undefined,
-    franchiseeOccupation: assignedUser ? 'Business Owner' : undefined,
-    franchiseeIncome: assignedUser ? '18 Lakhs per annum' : undefined,
-    maritalStatus: assignedUser ? 'Married' : undefined,
-    qualification: assignedUser ? 'B.Pharm' : undefined,
-    retailPharmacyExperience: assignedUser ? true : undefined,
-    hasOtherBusinesses: assignedUser ? true : undefined,
-    otherBusinessesDetails: assignedUser ? 'Yes – Owns a medical distribution shop' : undefined,
+    ...moreDetails,
     statusHistory: statusHistory,
     interactions: interactions,
     notes: notes,
