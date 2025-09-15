@@ -19,6 +19,8 @@ export const LeadProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     try {
+      // Force a reset of the data to ensure the new distribution is applied.
+      localStorage.removeItem('allLeads'); 
       const storedLeads = localStorage.getItem('allLeads');
       let leadsToLoad: Lead[];
 
