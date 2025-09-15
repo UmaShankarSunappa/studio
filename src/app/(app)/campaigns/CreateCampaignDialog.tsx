@@ -5,6 +5,7 @@ import * as React from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { DateRange } from "react-day-picker";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -25,9 +26,25 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { DateRangePicker } from "@/components/ui/date-range-picker";
+import { UserState } from "@/types";
+
+const userStates: Exclude<UserState, "All">[] = ["Telangana", "Tamil Nadu"];
 
 const campaignFormSchema = z.object({
   name: z.string().min(3, "Campaign name must be at least 3 characters."),
+  state: z.enum(["Telangana", "Tamil Nadu"]),
+  period: z.object({
+    from: z.date(),
+    to: z.date(),
+  }).optional(),
 });
 
 type CampaignFormValues = z.infer<typeof campaignFormSchema>;
@@ -35,7 +52,7 @@ type CampaignFormValues = z.infer<typeof campaignFormSchema>;
 interface CreateCampaignDialogProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  onCreateCampaign: (name: string) => void;
+  onCreateCampaign: (values: CampaignFormValues) => void;
 }
 
 export function CreateCampaignDialog({ isOpen, onOpenChange, onCreateCampaign }: CreateCampaignDialogProps) {
@@ -47,7 +64,7 @@ export function CreateCampaignDialog({ isOpen, onOpenChange, onCreateCampaign }:
   });
 
   const onSubmit = (data: CampaignFormValues) => {
-    onCreateCampaign(data.name);
+    onCreateCampaign(data);
     form.reset();
     onOpenChange(false);
   };
@@ -58,7 +75,7 @@ export function CreateCampaignDialog({ isOpen, onOpenChange, onCreateCampaign }:
         <DialogHeader>
           <DialogTitle>Create New Campaign</DialogTitle>
           <DialogDescription>
-            Enter a name for your new campaign. A unique, trackable URL will be generated.
+            Enter the details for your new campaign. A unique, trackable URL and QR code will be generated.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -72,6 +89,39 @@ export function CreateCampaignDialog({ isOpen, onOpenChange, onCreateCampaign }:
                   <FormControl>
                     <Input placeholder="e.g., Facebook Ad - Jagityal Store" {...field} />
                   </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="state"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>State</FormLabel>
+                   <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                        <SelectTrigger>
+                            <SelectValue placeholder="Select a state" />
+                        </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                        {userStates.map(state => (
+                            <SelectItem key={state} value={state}>{state}</SelectItem>
+                        ))}
+                        </SelectContent>
+                    </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+             <FormField
+              control={form.control}
+              name="period"
+              render={({ field }) => (
+                <FormItem className="flex flex-col">
+                  <FormLabel>Campaign Period</FormLabel>
+                  <DateRangePicker date={field.value} onDateChange={field.onChange} />
                   <FormMessage />
                 </FormItem>
               )}

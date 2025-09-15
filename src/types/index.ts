@@ -77,7 +77,7 @@ export type Campaign = {
   slug: string;
   createdAt: Date;
   leadCount: number;
-  state?: UserState;
+  state: "Telangana" | "Tamil Nadu" | "All";
   period?: { from: Date; to: Date };
 };
 

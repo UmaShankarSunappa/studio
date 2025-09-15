@@ -2,15 +2,18 @@
 "use client";
 
 import * as React from "react";
-import { PlusCircle, MoreHorizontal, Copy, Link as LinkIcon, Users, Loader2 } from "lucide-react";
+import { PlusCircle, MoreHorizontal, Copy, Link as LinkIcon, Users, Loader2, QrCode, Download } from "lucide-react";
 import { format } from "date-fns";
 import { v4 as uuidv4 } from 'uuid';
 import { useRouter } from "next/navigation";
+import QRCode from "react-qr-code";
+import { toPng } from 'html-to-image';
 
 import { useAuth } from "@/hooks/use-auth";
 import { useCampaigns } from "@/hooks/use-campaigns";
 import { useToast } from "@/hooks/use-toast";
-import type { Campaign } from "@/types";
+import type { Campaign, UserState } from "@/types";
+import { useLeads } from "@/hooks/use-leads";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -18,7 +21,13 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CreateCampaignDialog } from "./CreateCampaignDialog";
-import { useLeads } from "@/hooks/use-leads";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+
+type CampaignFormValues = {
+  name: string;
+  state: "Telangana" | "Tamil Nadu";
+  period?: { from: Date; to: Date };
+}
 
 export default function CampaignsPage() {
   const router = useRouter();
@@ -27,6 +36,9 @@ export default function CampaignsPage() {
   const { leads } = useLeads();
   const { toast } = useToast();
   const [isCreateCampaignOpen, setIsCreateCampaignOpen] = React.useState(false);
+  const [qrCodeToView, setQrCodeToView] = React.useState<Campaign | null>(null);
+
+  const qrCodeRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
     if (!authLoading && currentUser?.role !== 'Admin') {
@@ -41,8 +53,8 @@ export default function CampaignsPage() {
     }));
   }, [campaigns, leads]);
 
-  const handleCreateCampaign = (campaignName: string) => {
-    const slug = campaignName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+  const handleCreateCampaign = (values: CampaignFormValues) => {
+    const slug = values.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
     if (campaigns.some(c => c.slug === slug)) {
       toast({
         variant: "destructive",
@@ -54,15 +66,17 @@ export default function CampaignsPage() {
 
     const newCampaign: Campaign = {
       id: uuidv4(),
-      name: campaignName,
+      name: values.name,
       slug: slug,
+      state: values.state,
+      period: values.period,
       createdAt: new Date(),
       leadCount: 0,
     };
     setCampaigns(prev => [...prev, newCampaign]);
     toast({
       title: "Campaign Created!",
-      description: `The campaign "${campaignName}" has been successfully created.`,
+      description: `The campaign "${values.name}" has been successfully created.`,
     });
   };
 
@@ -74,6 +88,28 @@ export default function CampaignsPage() {
       description: "The trackable campaign URL has been copied to your clipboard.",
     });
   };
+  
+  const downloadQrCode = React.useCallback(() => {
+    if (qrCodeRef.current === null || !qrCodeToView) {
+      return;
+    }
+
+    toPng(qrCodeRef.current, { cacheBust: true, })
+      .then((dataUrl) => {
+        const link = document.createElement('a');
+        link.download = `${qrCodeToView.slug}-qrcode.png`;
+        link.href = dataUrl;
+        link.click();
+      })
+      .catch((err) => {
+        console.error(err);
+        toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Failed to download QR code.",
+        });
+      })
+  }, [qrCodeToView, toast]);
 
   const loading = authLoading || campaignsLoading;
 
@@ -114,9 +150,10 @@ export default function CampaignsPage() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Campaign Name</TableHead>
+                    <TableHead>State</TableHead>
+                    <TableHead>Period</TableHead>
                     <TableHead>Trackable URL</TableHead>
-                    <TableHead>Leads Generated</TableHead>
-                    <TableHead>Date Created</TableHead>
+                    <TableHead>Leads</TableHead>
                     <TableHead><span className="sr-only">Actions</span></TableHead>
                   </TableRow>
                 </TableHeader>
@@ -124,6 +161,12 @@ export default function CampaignsPage() {
                   {campaignsWithLeadCounts.map((campaign) => (
                     <TableRow key={campaign.id}>
                       <TableCell className="font-medium">{campaign.name}</TableCell>
+                       <TableCell>{campaign.state}</TableCell>
+                      <TableCell>
+                        {campaign.period 
+                            ? `${format(new Date(campaign.period.from), "dd/MM/yy")} - ${format(new Date(campaign.period.to), "dd/MM/yy")}`
+                            : '-'}
+                      </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <LinkIcon className="h-4 w-4 text-muted-foreground" />
@@ -136,7 +179,6 @@ export default function CampaignsPage() {
                             {campaign.leadCount}
                         </Badge>
                       </TableCell>
-                      <TableCell>{format(new Date(campaign.createdAt), "MMM d, yyyy")}</TableCell>
                       <TableCell>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
@@ -149,6 +191,10 @@ export default function CampaignsPage() {
                             <DropdownMenuItem onClick={() => copyToClipboard(campaign.slug)}>
                               <Copy className="mr-2 h-4 w-4" />
                               Copy URL
+                            </DropdownMenuItem>
+                             <DropdownMenuItem onClick={() => setQrCodeToView(campaign)}>
+                              <QrCode className="mr-2 h-4 w-4" />
+                              View QR Code
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
@@ -171,6 +217,24 @@ export default function CampaignsPage() {
         onOpenChange={setIsCreateCampaignOpen}
         onCreateCampaign={handleCreateCampaign}
       />
+      <Dialog open={!!qrCodeToView} onOpenChange={(isOpen) => !isOpen && setQrCodeToView(null)}>
+        <DialogContent>
+            <DialogHeader>
+                <DialogTitle>Campaign QR Code</DialogTitle>
+            </DialogHeader>
+            {qrCodeToView && (
+                <div className="flex flex-col items-center gap-4 py-4">
+                    <div ref={qrCodeRef} className="p-4 bg-white">
+                         <QRCode value={`${window.location.origin}/c/${qrCodeToView.slug}`} />
+                    </div>
+                    <Button onClick={downloadQrCode}>
+                        <Download className="mr-2 h-4 w-4" />
+                        Download PNG
+                    </Button>
+                </div>
+            )}
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
