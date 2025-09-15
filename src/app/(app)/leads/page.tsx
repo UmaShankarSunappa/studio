@@ -49,14 +49,14 @@ import { Checkbox } from "@/components/ui/checkbox";
 
 const statusColors: Record<LeadStatus, string> = {
   "New": "bg-blue-100 text-blue-800",
-  "WhatsApp - Sent": "bg-green-100 text-green-800",
-  "WhatsApp - Delivery Failed": "bg-yellow-100 text-yellow-800",
-  "Form 2 - Submitted": "bg-indigo-100 text-indigo-800",
-  "Form 2 - No Response": "bg-orange-100 text-orange-800",
+  "Form-2 Pending": "bg-yellow-100 text-yellow-800",
+  "Form-2 No Response": "bg-orange-100 text-orange-800",
+  "Form-2 Submitted": "bg-indigo-100 text-indigo-800",
   "In Discussion": "bg-sky-100 text-sky-800",
-  "Follow-up Required": "bg-teal-100 text-teal-800",
+  "Follow-up Needed": "bg-teal-100 text-teal-800",
   "Converted": "bg-emerald-100 text-emerald-800",
   "Not Interested": "bg-gray-100 text-gray-800",
+  "Not Qualified": "bg-red-100 text-red-800",
 };
 
 
@@ -319,7 +319,7 @@ export default function LeadsPage() {
 
   const statusOptions = leadStatuses.map(status => ({ value: status, label: status }));
   
-  const assignableStatuses: LeadStatus[] = ['WhatsApp - Delivery Failed', 'Form 2 - Submitted', 'Form 2 - No Response'];
+  const assignableStatuses: LeadStatus[] = ['Form-2 Submitted', 'Form-2 No Response'];
   const assignableLeads = filteredLeads.filter(lead => assignableStatuses.includes(lead.status) && !lead.assignedUser);
 
   const handleSelectAll = (checked: boolean) => {

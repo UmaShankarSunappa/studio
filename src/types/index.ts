@@ -4,14 +4,14 @@ export type LeadSource = "Newspaper" | "YouTube" | "Field Marketing" | "Website"
 
 export type LeadStatus =
   | "New"
-  | "WhatsApp - Sent"
-  | "WhatsApp - Delivery Failed"
-  | "Form 2 - Submitted"
-  | "Form 2 - No Response"
+  | "Form-2 Pending"
+  | "Form-2 No Response"
+  | "Form-2 Submitted"
   | "In Discussion"
-  | "Follow-up Required"
+  | "Follow-up Needed"
   | "Converted"
-  | "Not Interested";
+  | "Not Interested"
+  | "Not Qualified";
 
 export type UserRole = "Admin" | "Manager" | "Evaluator";
 export type UserState = "Telangana" | "Tamil Nadu" | "All";

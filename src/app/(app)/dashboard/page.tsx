@@ -111,7 +111,7 @@ export default function DashboardPage() {
   };
 
   // Funnel Analysis Data
-  const funnelStages: LeadStatus[] = ["New", "Form 2 - Submitted", "In Discussion", "Converted"];
+  const funnelStages: LeadStatus[] = ["New", "Form-2 Submitted", "In Discussion", "Converted"];
   const funnelData = funnelStages.map(stage => ({
       name: stage,
       value: leads.filter(l => funnelStages.slice(funnelStages.indexOf(stage)).includes(l.status)).length,
@@ -353,5 +353,3 @@ export default function DashboardPage() {
     </div>
   );
 }
-
-    

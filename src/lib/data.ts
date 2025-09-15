@@ -16,14 +16,14 @@ export const allUsers: User[] = [
 
 export const leadStatuses: LeadStatus[] = [
     "New",
-    "WhatsApp - Sent",
-    "WhatsApp - Delivery Failed",
-    "Form 2 - Submitted",
-    "Form 2 - No Response",
+    "Form-2 Pending",
+    "Form-2 No Response",
+    "Form-2 Submitted",
     "In Discussion",
-    "Follow-up Required",
+    "Follow-up Needed",
     "Converted",
-    "Not Interested"
+    "Not Interested",
+    "Not Qualified"
 ];
 
 const leadSources: LeadSource[] = ["Newspaper", "YouTube", "Field Marketing", "Website", "Referral"];
@@ -48,13 +48,13 @@ export const leads: Lead[] = Array.from({ length: 100 }, (_, i) => {
   const name = names[i % names.length];
   const dateAdded = new Date(new Date().setDate(new Date().getDate() - i * 2));
   
-  const assignableStatuses = leadStatuses.filter(s => s !== "Not Interested" && s !== "Converted");
+  const assignableStatuses = leadStatuses.filter(s => s !== "Not Interested" && s !== "Converted" && s !== "Not Qualified");
   const currentStatus = assignableStatuses[i % assignableStatuses.length];
   
   let assignedUser: User | undefined = undefined;
 
-  const statusesRequiringAssignment: LeadStatus[] = ['WhatsApp - Delivery Failed', 'Form 2 - Submitted', 'Form 2 - No Response'];
-  const initialStatuses: LeadStatus[] = ['New', 'WhatsApp - Sent'];
+  const statusesRequiringAssignment: LeadStatus[] = ['Form-2 No Response', 'Form-2 Submitted'];
+  const initialStatuses: LeadStatus[] = ['New', 'Form-2 Pending'];
   
   const evaluatorsInState = allUsers.filter(u => u.role === 'Evaluator' && u.state === state);
 
