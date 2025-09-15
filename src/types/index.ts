@@ -5,7 +5,6 @@ export type LeadStatus =
   | "New"
   | "WhatsApp - Sent"
   | "WhatsApp - Delivery Failed"
-  | "Form 2 - Pending"
   | "Form 2 - Submitted"
   | "Form 2 - No Response"
   | "In Discussion"
@@ -78,6 +77,8 @@ export type Campaign = {
   slug: string;
   createdAt: Date;
   leadCount: number;
+  state?: UserState;
+  period?: { from: Date; to: Date };
 };
 
 // Types for Availability and Slot Booking

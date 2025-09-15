@@ -51,7 +51,6 @@ const statusColors: Record<LeadStatus, string> = {
   "New": "bg-blue-100 text-blue-800",
   "WhatsApp - Sent": "bg-green-100 text-green-800",
   "WhatsApp - Delivery Failed": "bg-yellow-100 text-yellow-800",
-  "Form 2 - Pending": "bg-purple-100 text-purple-800",
   "Form 2 - Submitted": "bg-indigo-100 text-indigo-800",
   "Form 2 - No Response": "bg-orange-100 text-orange-800",
   "In Discussion": "bg-sky-100 text-sky-800",
@@ -320,7 +319,7 @@ export default function LeadsPage() {
 
   const statusOptions = leadStatuses.map(status => ({ value: status, label: status }));
   
-  const assignableStatuses: LeadStatus[] = ['WhatsApp - Delivery Failed', 'Form 2 - Submitted', 'Form 2 - No Response', 'Form 2 - Pending'];
+  const assignableStatuses: LeadStatus[] = ['WhatsApp - Delivery Failed', 'Form 2 - Submitted', 'Form 2 - No Response'];
   const assignableLeads = filteredLeads.filter(lead => assignableStatuses.includes(lead.status) && !lead.assignedUser);
 
   const handleSelectAll = (checked: boolean) => {
