@@ -48,29 +48,26 @@ export const leads: Lead[] = Array.from({ length: 100 }, (_, i) => {
   const name = names[i % names.length];
   const dateAdded = new Date(new Date().setDate(new Date().getDate() - i * 2));
   
-  const assignableStatuses = leadStatuses.filter(s => s !== "Not Interested" && s !== "Converted" && s !== "Not Qualified");
-  const currentStatus = assignableStatuses[i % assignableStatuses.length];
+  const currentStatus = leadStatuses[i % leadStatuses.length];
   
   let assignedUser: User | undefined = undefined;
-
-  const statusesRequiringAssignment: LeadStatus[] = ['Form-2 No Response', 'Form-2 Submitted'];
-  const initialStatuses: LeadStatus[] = ['New', 'Form-2 Pending'];
   
   const evaluatorsInState = allUsers.filter(u => u.role === 'Evaluator' && u.state === state);
 
-  if (!initialStatuses.includes(currentStatus) && !statusesRequiringAssignment.includes(currentStatus)) {
-    if (evaluatorsInState.length > 0) {
-        assignedUser = evaluatorsInState[i % evaluatorsInState.length];
-    }
-  } else if (statusesRequiringAssignment.includes(currentStatus)) {
-    if (i % 3 !== 0) {
-        // Leave it unassigned
-    } else {
-        if (evaluatorsInState.length > 0) {
-            assignedUser = evaluatorsInState[i % evaluatorsInState.length];
-        }
-    }
+  // Assign evaluators to leads that are past the initial stages
+  const statusesForAssignment: LeadStatus[] = [
+    'Form-2 Submitted',
+    'In Discussion',
+    'Follow-up Needed',
+    'Converted',
+    'Not Interested',
+    'Not Qualified'
+  ];
+  
+  if (statusesForAssignment.includes(currentStatus) && evaluatorsInState.length > 0) {
+    assignedUser = evaluatorsInState[i % evaluatorsInState.length];
   }
+
 
   const statusHistory = [{ status: "New" as LeadStatus, date: new Date(dateAdded.getTime() - 86400000) }];
   if (currentStatus !== "New") {
