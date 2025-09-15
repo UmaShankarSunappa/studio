@@ -152,7 +152,6 @@ export default function CampaignsPage() {
                     <TableHead>Campaign Name</TableHead>
                     <TableHead>State</TableHead>
                     <TableHead>Period</TableHead>
-                    <TableHead>Trackable URL</TableHead>
                     <TableHead>Leads</TableHead>
                     <TableHead><span className="sr-only">Actions</span></TableHead>
                   </TableRow>
@@ -166,12 +165,6 @@ export default function CampaignsPage() {
                         {campaign.period 
                             ? `${format(new Date(campaign.period.from), "dd/MM/yy")} - ${format(new Date(campaign.period.to), "dd/MM/yy")}`
                             : '-'}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <LinkIcon className="h-4 w-4 text-muted-foreground" />
-                          <span className="text-muted-foreground text-sm">{`/c/${campaign.slug}`}</span>
-                        </div>
                       </TableCell>
                       <TableCell>
                         <Badge variant="secondary" className="flex items-center gap-2 w-fit">
