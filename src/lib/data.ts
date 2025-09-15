@@ -38,8 +38,8 @@ const names = [
   "Geeta Singh", "Anil Patel", "Rekha Sharma", "Sanjay Mehta", "Anita Desai"
 ];
 
-export const leads: Lead[] = Array.from({ length: 100 }, (_, i) => {
-  const isTelangana = i < 50;
+export const leads: Lead[] = Array.from({ length: 150 }, (_, i) => {
+  const isTelangana = i < 75;
   const state: "Telangana" | "Tamil Nadu" = isTelangana ? "Telangana" : "Tamil Nadu";
   const city = isTelangana 
     ? telanganaCities[i % telanganaCities.length]
