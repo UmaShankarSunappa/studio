@@ -1,5 +1,5 @@
 
-import type { User, Lead, LeadSource, LeadStatus, Note, UserRole, UserState } from '@/types';
+import type { User, Lead, LeadSource, LeadStatus, Note, UserRole, UserState, InterestType } from '@/types';
 
 export const allUsers: User[] = [
   { id: 'user-1', name: 'Admin User', avatar: 'https://i.pravatar.cc/150?u=user-1', role: 'Admin', state: 'All' },
@@ -29,6 +29,7 @@ export const leadStatuses: LeadStatus[] = [
 const leadSources: LeadSource[] = ["Newspaper", "YouTube", "Field Marketing", "Website", "Referral"];
 const telanganaCities = ["Hyderabad", "Warangal", "Nizamabad", "Karimnagar"];
 const tamilNaduCities = ["Chennai", "Coimbatore", "Madurai", "Tiruchirappalli"];
+const interestTypes: InterestType[] = ["Franchisee", "Convert", "Job", "Rent"];
 
 const names = [
   "Rohan Sharma", "Priya Patel", "Amit Singh", "Anjali Mehta", "Vikram Kumar",
@@ -119,6 +120,8 @@ export const leads: Lead[] = Array.from({ length: 100 }, (_, i) => {
     name: name,
     email: `${name.toLowerCase().replace(' ', '.')}@example.com`,
     phone: `9876543${(21 + i).toString().padStart(3, '0')}`,
+    pincode: isTelangana ? `5000${(i % 90) + 10}` : `6000${(i % 90) + 10}`,
+    interestType: interestTypes[i % interestTypes.length],
     city: city,
     state: state,
     source: leadSources[i % leadSources.length],

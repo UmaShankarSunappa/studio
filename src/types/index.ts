@@ -1,4 +1,5 @@
 
+
 export type LeadSource = "Newspaper" | "YouTube" | "Field Marketing" | "Website" | "Referral" | string; // Allow campaign names as sources
 
 export type LeadStatus =
@@ -44,6 +45,8 @@ export type Note = {
   user: User;
 };
 
+export type InterestType = "Franchisee" | "Convert" | "Job" | "Rent";
+
 export type Lead = {
   id: string;
   name: string;
@@ -54,7 +57,9 @@ export type Lead = {
   dateAdded: Date;
   assignedUser?: User;
   phone: string;
-  email: string;
+  email?: string;
+  pincode?: string;
+  interestType?: InterestType;
   // More Details
   investmentCapacity?: '8–12' | '12–15' | '15–20';
   franchiseeAge?: number;

@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { v4 as uuidv4 } from "uuid";
 import { CheckCircle, Loader2 } from "lucide-react";
 
-import type { Lead, UserState, Campaign } from "@/types";
+import type { Lead, UserState, Campaign, InterestType } from "@/types";
 import { useCampaigns } from "@/hooks/use-campaigns";
 import { useLeads } from "@/hooks/use-leads";
 
@@ -16,18 +16,26 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { FranchiseFlowLogo } from "@/components/icons";
 
 const states: UserState[] = ["Telangana", "Tamil Nadu"];
+const interestTypes: { value: InterestType, label: string }[] = [
+    { value: 'Franchisee', label: 'Interested in Franchisee' },
+    { value: 'Convert', label: 'Converting existing medical shop' },
+    { value: 'Job', label: 'Looking for a Job' },
+    { value: 'Rent', label: 'Renting a shop' },
+];
 
 const leadCaptureSchema = z.object({
   name: z.string().min(1, "Name cannot be blank."),
   phone: z.string().regex(/^\d{10}$/, "Mobile number must be 10 digits."),
+  email: z.string().email("Invalid email address.").optional().or(z.literal('')),
   city: z.string().min(1, "City cannot be blank."),
   state: z.enum(["Telangana", "Tamil Nadu"]),
-  confirmInterest: z.boolean().refine(val => val === true, {
-    message: "You must confirm your interest.",
+  pincode: z.string().regex(/^\d{6}$/, "Pincode must be 6 digits."),
+  interestType: z.enum(["Franchisee", "Convert", "Job", "Rent"], {
+    required_error: "You must select an interest type.",
   }),
 });
 
@@ -45,8 +53,9 @@ export default function LeadCapturePage({ params }: { params: { slug: string } }
     defaultValues: {
       name: "",
       phone: "",
+      email: "",
       city: "",
-      confirmInterest: false,
+      pincode: "",
     },
   });
 
@@ -67,10 +76,12 @@ export default function LeadCapturePage({ params }: { params: { slug: string } }
     const now = new Date();
     const newLead: Omit<Lead, 'id'> = {
       name: data.name,
-      email: `${data.name.toLowerCase().replace(/\s/g, ".")}@generated-email.com`, // Dummy email
+      email: data.email || undefined,
       phone: data.phone,
       city: data.city,
       state: data.state,
+      pincode: data.pincode,
+      interestType: data.interestType,
       source: campaign.name,
       status: "New",
       dateAdded: now,
@@ -156,19 +167,34 @@ export default function LeadCapturePage({ params }: { params: { slug: string } }
                   </FormItem>
                 )}
               />
-              <FormField
-                control={form.control}
-                name="phone"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Mobile Number</FormLabel>
-                    <FormControl>
-                      <Input placeholder="10-digit mobile number" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="phone"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Mobile Number</FormLabel>
+                        <FormControl>
+                          <Input placeholder="10-digit mobile number" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email Address <span className="text-muted-foreground">(Optional)</span></FormLabel>
+                        <FormControl>
+                          <Input placeholder="name@example.com" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
               <div className="grid grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
@@ -206,26 +232,47 @@ export default function LeadCapturePage({ params }: { params: { slug: string } }
                   )}
                 />
               </div>
-              <FormField
-                control={form.control}
-                name="confirmInterest"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                     <FormControl>
-                        <Checkbox
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                        />
-                    </FormControl>
-                    <div className="space-y-1 leading-none">
-                        <FormLabel>
-                           Confirm Interest in Franchise
-                        </FormLabel>
+                <FormField
+                    control={form.control}
+                    name="pincode"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Pincode</FormLabel>
+                        <FormControl>
+                            <Input placeholder="Enter your 6-digit pincode" {...field} />
+                        </FormControl>
                         <FormMessage />
-                    </div>
-                  </FormItem>
-                )}
-              />
+                        </FormItem>
+                    )}
+                />
+               <FormField
+                  control={form.control}
+                  name="interestType"
+                  render={({ field }) => (
+                    <FormItem className="space-y-3">
+                      <FormLabel>What are you interested in?</FormLabel>
+                      <FormControl>
+                        <RadioGroup
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                          className="flex flex-col space-y-1"
+                        >
+                          {interestTypes.map(type => (
+                             <FormItem key={type.value} className="flex items-center space-x-3 space-y-0">
+                                <FormControl>
+                                  <RadioGroupItem value={type.value} />
+                                </FormControl>
+                                <FormLabel className="font-normal">
+                                  {type.label}
+                                </FormLabel>
+                              </FormItem>
+                          ))}
+                        </RadioGroup>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
                 {form.formState.isSubmitting ? "Submitting..." : "Submit Inquiry"}
               </Button>
