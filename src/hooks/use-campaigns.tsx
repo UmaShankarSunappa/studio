@@ -5,8 +5,30 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import type { Campaign } from '@/types';
 
 const initialCampaigns: Campaign[] = [
-    { id: 'camp-1', name: 'Facebook ad -Jagityal store', slug: 'facebook-ad-jagityal-store', createdAt: new Date(), leadCount: 0 },
-    { id: 'camp-2', name: 'youtube ad -yadagirigutta store', slug: 'youtube-ad-yadagirigutta-store', createdAt: new Date(), leadCount: 0 },
+    { 
+      id: 'camp-1', 
+      name: 'Facebook ad -Jagityal store', 
+      slug: 'facebook-ad-jagityal-store', 
+      createdAt: new Date(), 
+      leadCount: 0,
+      state: 'Telangana',
+      period: {
+        from: new Date(new Date().setMonth(new Date().getMonth() - 1)),
+        to: new Date(new Date().setMonth(new Date().getMonth() + 1)),
+      }
+    },
+    { 
+      id: 'camp-2', 
+      name: 'youtube ad -yadagirigutta store', 
+      slug: 'youtube-ad-yadagirigutta-store', 
+      createdAt: new Date(), 
+      leadCount: 0,
+      state: 'Tamil Nadu',
+      period: {
+        from: new Date(),
+        to: new Date(new Date().setDate(new Date().getDate() + 30)),
+      }
+    },
 ];
 
 
@@ -29,6 +51,7 @@ export const CampaignProvider = ({ children }: { children: ReactNode }) => {
         const parsedCampaigns = JSON.parse(storedCampaigns).map((c: any) => ({
             ...c,
             createdAt: new Date(c.createdAt),
+            period: c.period ? { from: new Date(c.period.from), to: new Date(c.period.to) } : undefined
         }));
         setCampaigns(parsedCampaigns);
       } else {
