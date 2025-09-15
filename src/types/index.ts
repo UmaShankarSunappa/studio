@@ -79,3 +79,29 @@ export type Campaign = {
   createdAt: Date;
   leadCount: number;
 };
+
+// Types for Availability and Slot Booking
+export type AvailabilityStatus = "Not Set" | "Calling" | "Field Work" | "Not Available" | "Leave";
+
+export type DailyAvailability = {
+  firstHalf: AvailabilityStatus;
+  secondHalf: AvailabilityStatus;
+};
+
+export type Availability = {
+  // Key is evaluator's userId
+  [userId: string]: {
+    // Key is date string 'yyyy-MM-dd'
+    [date: string]: DailyAvailability;
+  };
+};
+
+export type Appointment = {
+    id: string;
+    leadId: string;
+    evaluatorId: string;
+    date: Date; // This will store the full date and time of the slot
+    duration: number; // in minutes, e.g., 20
+    status: 'Booked' | 'Completed' | 'Cancelled' | 'Rescheduled';
+    notes?: string;
+};

@@ -3,7 +3,7 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
-import { LogOut, User as UserIcon, Grip, LayoutGrid, Users, Megaphone } from "lucide-react";
+import { LogOut, User as UserIcon, Grip, LayoutGrid, Users, Megaphone, Calendar } from "lucide-react";
 
 import {
   SidebarHeader,
@@ -41,13 +41,14 @@ export function AppSidebar() {
       <SidebarHeader>
         <div className="flex items-center gap-2">
             <FranchiseFlowLogo className="size-8 text-primary" />
-            <span className="font-headline text-lg font-semibold">Franchisee lead management</span>
+            <span className="font-headline text-lg font-semibold">Franchise Flow</span>
         </div>
       </SidebarHeader>
       <SidebarContent>
         <SidebarMenu>
           {loading ? (
             <>
+                <SidebarMenuSkeleton showIcon />
                 <SidebarMenuSkeleton showIcon />
                 <SidebarMenuSkeleton showIcon />
             </>
@@ -66,6 +67,14 @@ export function AppSidebar() {
                   <SidebarMenuButton tooltip="Dashboard" isActive={isActive('/dashboard')}>
                     <LayoutGrid />
                     <span>Dashboard</span>
+                  </SidebarMenuButton>
+                </Link>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <Link href="/availability">
+                  <SidebarMenuButton tooltip="My Availability" isActive={isActive('/availability')}>
+                    <Calendar />
+                    <span>My Availability</span>
                   </SidebarMenuButton>
                 </Link>
               </SidebarMenuItem>
