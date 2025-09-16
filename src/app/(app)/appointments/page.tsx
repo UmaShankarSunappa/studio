@@ -9,12 +9,23 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 import { useAppointments } from "@/hooks/use-appointments";
 import { useLeads } from "@/hooks/use-leads";
-import { Loader2, PlusCircle, Clock, User as UserIcon } from "lucide-react";
+import { Loader2, PlusCircle, Clock, User as UserIcon, Trash2 } from "lucide-react";
 import { CreateAppointmentDialog } from "./CreateAppointmentDialog";
 import type { Appointment } from "@/types";
 import { v4 as uuidv4 } from 'uuid';
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 export default function AppointmentsPage() {
   const { user: currentUser, loading: authLoading } = useAuth();
@@ -25,6 +36,8 @@ export default function AppointmentsPage() {
 
   const [selectedDate, setSelectedDate] = React.useState<Date | undefined>(new Date());
   const [isCreateAppointmentOpen, setIsCreateAppointmentOpen] = React.useState(false);
+  const [appointmentToDelete, setAppointmentToDelete] = React.useState<Appointment | null>(null);
+
 
   React.useEffect(() => {
     if (!authLoading && currentUser?.role !== 'Evaluator') {
@@ -55,6 +68,15 @@ export default function AppointmentsPage() {
       title: "Appointment Booked!",
       description: "The slot has been successfully booked for the lead.",
     });
+  };
+
+  const handleDeleteAppointment = (appointmentId: string) => {
+    setAppointments(prev => prev.filter(app => app.id !== appointmentId));
+    toast({
+      title: "Appointment Deleted",
+      description: "The appointment has been removed from the schedule.",
+    });
+    setAppointmentToDelete(null);
   };
 
   const todaysAppointments = React.useMemo(() => {
@@ -128,7 +150,28 @@ export default function AppointmentsPage() {
                                 <p className="text-sm text-muted-foreground flex items-center gap-1"><UserIcon className="w-3 h-3"/> {getLeadName(app.leadId)}</p>
                             </div>
                           </div>
-                           <p className="text-xs text-muted-foreground italic">{app.notes}</p>
+                           <div className="flex items-center gap-2">
+                             <p className="text-xs text-muted-foreground italic max-w-xs truncate">{app.notes}</p>
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive">
+                                      <Trash2 className="w-4 h-4" />
+                                    </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                            This action cannot be undone. This will permanently delete the appointment.
+                                        </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                        <AlertDialogAction onClick={() => handleDeleteAppointment(app.id)}>Delete</AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
+                           </div>
                         </div>
                       ))
                     ) : <p className="text-sm text-muted-foreground">No appointments booked.</p>}
@@ -139,7 +182,7 @@ export default function AppointmentsPage() {
                    <div className="space-y-3">
                     {secondHalfAppointments.length > 0 ? (
                       secondHalfAppointments.map(app => (
-                        <div key={app.id} className="p-3 bg-secondary rounded-md flex justify-between items-center">
+                         <div key={app.id} className="p-3 bg-secondary rounded-md flex justify-between items-center">
                           <div className="flex items-center gap-3">
                             <Clock className="w-4 h-4 text-muted-foreground" />
                             <div>
@@ -147,7 +190,28 @@ export default function AppointmentsPage() {
                                 <p className="text-sm text-muted-foreground flex items-center gap-1"><UserIcon className="w-3 h-3"/> {getLeadName(app.leadId)}</p>
                             </div>
                           </div>
-                           <p className="text-xs text-muted-foreground italic">{app.notes}</p>
+                           <div className="flex items-center gap-2">
+                             <p className="text-xs text-muted-foreground italic max-w-xs truncate">{app.notes}</p>
+                             <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive">
+                                      <Trash2 className="w-4 h-4" />
+                                    </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                            This action cannot be undone. This will permanently delete the appointment.
+                                        </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                        <AlertDialogAction onClick={() => handleDeleteAppointment(app.id)}>Delete</AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
+                           </div>
                         </div>
                       ))
                     ) : <p className="text-sm text-muted-foreground">No appointments booked.</p>}
