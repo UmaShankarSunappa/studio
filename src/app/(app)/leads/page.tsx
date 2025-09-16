@@ -17,6 +17,8 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 import { v4 as uuidv4 } from 'uuid';
+import { useSearchParams } from 'next/navigation';
+
 
 import type { Lead, LeadSource, LeadStatus, User as UserType, Interaction, CallStatus, InterestType } from "@/types";
 import { leadStatuses } from "@/lib/data";
@@ -74,11 +76,13 @@ const franchiseeTypeOptions: {value: InterestType, label: string}[] = [
     { value: "Convert", label: "Converting Existing Franchise" }
 ];
 
-export default function LeadsPage() {
+function LeadsPageContent() {
   const { user } = useAuth();
   const { leads, setLeads, loading: leadsLoading } = useLeads();
   const { users: allUsers, loading: usersLoading } = useUsers();
   const { toast } = useToast();
+  const searchParams = useSearchParams();
+
   const [filters, setFilters] = React.useState<{
     search: string;
     source: string;
@@ -98,6 +102,18 @@ export default function LeadsPage() {
   const [selectedLeadIds, setSelectedLeadIds] = React.useState<string[]>([]);
 
   const currentUser = user!;
+
+  React.useEffect(() => {
+    const leadId = searchParams.get('leadId');
+    if (leadId) {
+      const leadToShow = leads.find(l => l.id === leadId);
+      if (leadToShow) {
+        setSelectedLead(leadToShow);
+        setIsSheetOpen(true);
+      }
+    }
+  }, [searchParams, leads]);
+
 
   const handleAssign = (leadId: string, userToAssign: UserType) => {
     setLeads((prevLeads) =>
@@ -616,4 +632,12 @@ export default function LeadsPage() {
       />
     </>
   );
+}
+
+export default function LeadsPage() {
+  return (
+    <React.Suspense fallback={<div className="flex h-[80vh] items-center justify-center"><Loader2 className="h-8 w-8 animate-spin" /></div>}>
+      <LeadsPageContent />
+    </React.Suspense>
+  )
 }

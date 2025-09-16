@@ -78,6 +78,11 @@ export default function AppointmentsPage() {
     });
     setAppointmentToDelete(null);
   };
+  
+  const handleAppointmentClick = (leadId: string) => {
+    router.push(`/leads?leadId=${leadId}`);
+  };
+
 
   const todaysAppointments = React.useMemo(() => {
     if (!currentUser || !selectedDate) return [];
@@ -142,7 +147,7 @@ export default function AppointmentsPage() {
                     <div className="space-y-3">
                         {firstHalfAppointments.length > 0 ? (
                         firstHalfAppointments.map(app => (
-                            <div key={app.id} className="p-3 bg-secondary rounded-md flex justify-between items-center">
+                            <div key={app.id} className="p-3 bg-secondary rounded-md flex justify-between items-center group cursor-pointer hover:bg-muted" onClick={() => handleAppointmentClick(app.leadId)}>
                             <div className="flex items-center gap-3">
                                 <Clock className="w-4 h-4 text-muted-foreground" />
                                 <div>
@@ -150,7 +155,7 @@ export default function AppointmentsPage() {
                                     <p className="text-sm text-muted-foreground flex items-center gap-1"><UserIcon className="w-3 h-3"/> {getLeadName(app.leadId)}</p>
                                 </div>
                             </div>
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
                                 <p className="text-xs text-muted-foreground italic max-w-xs truncate">{app.notes}</p>
                                 <AlertDialog>
                                     <AlertDialogTrigger asChild>
@@ -182,7 +187,7 @@ export default function AppointmentsPage() {
                     <div className="space-y-3">
                         {secondHalfAppointments.length > 0 ? (
                         secondHalfAppointments.map(app => (
-                            <div key={app.id} className="p-3 bg-secondary rounded-md flex justify-between items-center">
+                            <div key={app.id} className="p-3 bg-secondary rounded-md flex justify-between items-center group cursor-pointer hover:bg-muted" onClick={() => handleAppointmentClick(app.leadId)}>
                             <div className="flex items-center gap-3">
                                 <Clock className="w-4 h-4 text-muted-foreground" />
                                 <div>
@@ -190,7 +195,7 @@ export default function AppointmentsPage() {
                                     <p className="text-sm text-muted-foreground flex items-center gap-1"><UserIcon className="w-3 h-3"/> {getLeadName(app.leadId)}</p>
                                 </div>
                             </div>
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
                                 <p className="text-xs text-muted-foreground italic max-w-xs truncate">{app.notes}</p>
                                 <AlertDialog>
                                     <AlertDialogTrigger asChild>
