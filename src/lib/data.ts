@@ -29,7 +29,6 @@ export const leadStatuses: LeadStatus[] = [
 const leadSources: LeadSource[] = ["Newspaper", "YouTube", "Field Marketing", "Website", "Referral"];
 const telanganaCities = ["Hyderabad", "Warangal", "Nizamabad", "Karimnagar"];
 const tamilNaduCities = ["Chennai", "Coimbatore", "Madurai", "Tiruchirappalli"];
-const interestTypes: InterestType[] = ["Franchisee", "Convert", "Job", "Rent"];
 
 const names = [
   "Rohan Sharma", "Priya Patel", "Amit Singh", "Anjali Mehta", "Vikram Kumar",
@@ -54,7 +53,6 @@ export const leads: Lead[] = Array.from({ length: 150 }, (_, i) => {
   
   const evaluatorsInState = allUsers.filter(u => u.role === 'Evaluator' && u.state === state);
 
-  // Assign evaluators to leads that are past the initial stages
   const statusesForAssignment: LeadStatus[] = [
     'Form-2 Submitted',
     'In Discussion',
@@ -67,7 +65,6 @@ export const leads: Lead[] = Array.from({ length: 150 }, (_, i) => {
   if (statusesForAssignment.includes(currentStatus) && evaluatorsInState.length > 0) {
     assignedUser = evaluatorsInState[i % evaluatorsInState.length];
   }
-
 
   const statusHistory = [{ status: "New" as LeadStatus, date: new Date(dateAdded.getTime() - 86400000) }];
   if (currentStatus !== "New") {
@@ -111,6 +108,10 @@ export const leads: Lead[] = Array.from({ length: 150 }, (_, i) => {
         hasOtherBusinesses: undefined,
         otherBusinessesDetails: undefined,
       };
+
+  // Determine Franchisee Type based on 70/30 split
+  const isNewFranchisee = i % 10 < 7; // 70%
+  const interestType: InterestType = isNewFranchisee ? "Franchisee" : "Convert";
       
   return {
     id: `lead-${i + 1}`,
@@ -118,7 +119,7 @@ export const leads: Lead[] = Array.from({ length: 150 }, (_, i) => {
     email: `${name.toLowerCase().replace(' ', '.')}@example.com`,
     phone: `9876543${(21 + i).toString().padStart(3, '0')}`,
     pincode: isTelangana ? `5000${(i % 90) + 10}` : `6000${(i % 90) + 10}`,
-    interestType: interestTypes[i % interestTypes.length],
+    interestType: interestType,
     city: city,
     state: state,
     source: leadSources[i % leadSources.length],

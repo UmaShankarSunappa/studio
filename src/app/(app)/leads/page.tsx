@@ -18,7 +18,7 @@ import {
 import { format } from "date-fns";
 import { v4 as uuidv4 } from 'uuid';
 
-import type { Lead, LeadSource, LeadStatus, User as UserType, Interaction, CallStatus } from "@/types";
+import type { Lead, LeadSource, LeadStatus, User as UserType, Interaction, CallStatus, InterestType } from "@/types";
 import { leadStatuses } from "@/lib/data";
 import { useAuth } from "@/hooks/use-auth";
 import { useLeads } from "@/hooks/use-leads";
@@ -69,6 +69,11 @@ const sourceIcons: Record<LeadSource, React.ElementType> = {
   Referral: Share2,
 };
 
+const franchiseeTypeOptions: {value: InterestType, label: string}[] = [
+    { value: "Franchisee", label: "New Franchisee" },
+    { value: "Convert", label: "Converting Existing Franchise" }
+];
+
 export default function LeadsPage() {
   const { user } = useAuth();
   const { leads, setLeads, loading: leadsLoading } = useLeads();
@@ -78,10 +83,12 @@ export default function LeadsPage() {
     search: string;
     source: string;
     status: LeadStatus[];
+    franchiseeType: string;
   }>({
     search: "",
     source: "all",
     status: [],
+    franchiseeType: "all",
   });
   const [selectedLead, setSelectedLead] = React.useState<Lead | null>(null);
   const [leadToCall, setLeadToCall] = React.useState<Lead | null>(null);
@@ -303,7 +310,10 @@ export default function LeadsPage() {
         filters.source === "all" || lead.source === filters.source;
       const matchesStatus =
         filters.status.length === 0 || filters.status.includes(lead.status);
-      return matchesSearch && matchesSource && matchesStatus;
+      const matchesFranchiseeType =
+        filters.franchiseeType === "all" || lead.interestType === filters.franchiseeType;
+      
+      return matchesSearch && matchesSource && matchesStatus && matchesFranchiseeType;
     });
   }, [leads, filters, currentUser]);
 
@@ -342,6 +352,12 @@ export default function LeadsPage() {
       setSelectedLeadIds(prev => prev.filter(id => id !== leadId));
     }
   };
+
+  const getFranchiseeTypeLabel = (interestType?: InterestType) => {
+    if (interestType === 'Franchisee') return 'New Franchisee';
+    if (interestType === 'Convert') return 'Converting Existing';
+    return '-';
+  }
 
 
   if (leadsLoading || usersLoading) {
@@ -415,6 +431,19 @@ export default function LeadsPage() {
                     ))}
                   </SelectContent>
                 </Select>
+                 <Select value={filters.franchiseeType} onValueChange={(value) => setFilters(prev => ({ ...prev, franchiseeType: value }))}>
+                  <SelectTrigger className="w-full md:w-48">
+                    <SelectValue placeholder="Filter by type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Franchisee Types</SelectItem>
+                    {franchiseeTypeOptions.map((opt) => (
+                      <SelectItem key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 <MultiSelect
                     className="w-full md:w-48"
                     options={statusOptions}
@@ -446,7 +475,7 @@ export default function LeadsPage() {
                     )}
                     <th className="p-4 font-medium">Lead Name</th>
                     <th className="p-4 font-medium">City</th>
-                    <th className="p-4 font-medium">State</th>
+                    <th className="p-4 font-medium">Franchisee Type</th>
                     <th className="p-4 font-medium">Source</th>
                     <th className="p-4 font-medium">Status</th>
                     <th className="p-4 font-medium">Date Added</th>
@@ -483,7 +512,7 @@ export default function LeadsPage() {
                         )}
                         <td className="p-4 font-medium cursor-pointer" onClick={() => handleRowClick(lead)}>{lead.name}</td>
                         <td className="p-4 text-muted-foreground cursor-pointer" onClick={() => handleRowClick(lead)}>{lead.city}</td>
-                        <td className="p-4 text-muted-foreground cursor-pointer" onClick={() => handleRowClick(lead)}>{lead.state}</td>
+                        <td className="p-4 text-muted-foreground cursor-pointer" onClick={() => handleRowClick(lead)}>{getFranchiseeTypeLabel(lead.interestType)}</td>
                         <td className="p-4 cursor-pointer" onClick={() => handleRowClick(lead)}>
                           <div className="flex items-center gap-2">
                             <SourceIcon className="h-4 w-4 text-muted-foreground" />
