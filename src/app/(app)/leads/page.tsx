@@ -540,8 +540,9 @@ export default function LeadsPage() {
                             <td className="p-4 text-center">
                                 {lead.assignedUser?.id === currentUser.id && (
                                     <div className="flex items-center justify-center gap-2">
-                                        <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); handleCallClick(lead); }}>
-                                            <Phone className="mr-2 h-4 w-4" /> Call
+                                        <Button size="icon" variant="outline" onClick={(e) => { e.stopPropagation(); handleCallClick(lead); }}>
+                                            <Phone className="h-4 w-4" />
+                                            <span className="sr-only">Call</span>
                                         </Button>
                                         <Button size="icon" variant="outline" onClick={(e) => { e.stopPropagation(); handleWhatsAppClick(lead); }}>
                                             <WhatsAppIcon className="h-5 w-5 text-green-600" />
