@@ -123,7 +123,7 @@ export default function CampaignsPage() {
 
   return (
     <>
-      <div className="space-y-6">
+      <div className="space-y-8">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-headline font-bold tracking-tight">

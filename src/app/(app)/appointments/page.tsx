@@ -111,7 +111,7 @@ export default function AppointmentsPage() {
 
   return (
     <>
-      <div className="space-y-6">
+      <div className="space-y-8">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-headline font-bold tracking-tight">
@@ -127,7 +127,7 @@ export default function AppointmentsPage() {
           </Button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="md:col-span-1">
                  <Calendar
                     mode="single"

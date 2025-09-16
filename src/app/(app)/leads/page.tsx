@@ -388,7 +388,7 @@ function LeadsPageContent() {
 
   return (
     <>
-      <div className="space-y-6">
+      <div className="space-y-8">
         <header>
           <h1 className="text-3xl font-headline font-bold tracking-tight">
             Centralized Lead Management

@@ -32,7 +32,7 @@ function ClientAppLayout({ children }: { children: React.ReactNode }) {
         <AppSidebar />
       </Sidebar>
       <SidebarInset className="max-w-full overflow-x-hidden">
-        <div className="p-4 sm:p-6 lg:p-8">
+        <div className="p-6 sm:p-8 lg:p-10">
             {children}
         </div>
       </SidebarInset>

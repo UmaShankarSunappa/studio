@@ -166,7 +166,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <header>
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
@@ -188,7 +188,7 @@ export default function DashboardPage() {
              </div>
         </div>
       </header>
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
         <Card>
             <CardHeader>
                 <CardTitle>Total Leads</CardTitle>
@@ -228,7 +228,7 @@ export default function DashboardPage() {
             </CardContent>
         </Card>
       </div>
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-8 md:grid-cols-2">
         <Card>
           <CardHeader>
             <CardTitle>Source Performance Analysis</CardTitle>
@@ -270,7 +270,7 @@ export default function DashboardPage() {
             <CardTitle>Call Performance</CardTitle>
             <CardDescription>Evaluator call metrics and outcomes.</CardDescription>
           </CardHeader>
-          <CardContent className="grid gap-6 md:grid-cols-3">
+          <CardContent className="grid gap-8 md:grid-cols-3">
               <div className="md:col-span-2">
                 <Table>
                     <TableHeader>
@@ -306,7 +306,7 @@ export default function DashboardPage() {
               </div>
           </CardContent>
       </Card>
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-8 md:grid-cols-2">
         <Card>
             <CardHeader>
                 <CardTitle>Geographic Distribution</CardTitle>

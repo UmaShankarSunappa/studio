@@ -104,7 +104,7 @@ export default function AvailabilityPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <header>
         <h1 className="text-3xl font-headline font-bold tracking-tight">
           {currentUser.role === 'Evaluator' ? 'My Availability' : 'Team Availability'}
@@ -120,7 +120,7 @@ export default function AvailabilityPage() {
                 <CardTitle>Team Overview</CardTitle>
                 <CardDescription>View availability for a specific date.</CardDescription>
             </CardHeader>
-            <CardContent className="flex flex-col md:flex-row gap-6">
+            <CardContent className="flex flex-col md:flex-row gap-8">
                  <Calendar
                     mode="single"
                     selected={selectedDate}
@@ -160,7 +160,7 @@ export default function AvailabilityPage() {
             {currentUser.role === 'Evaluator' ? 'Select a date and mark your status.' : 'Select an evaluator and a date to update their schedule.'}
            </CardDescription>
         </CardHeader>
-        <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="md:col-span-1">
             <Calendar
               mode="single"
