@@ -41,7 +41,7 @@ export function AppSidebar() {
       <SidebarHeader>
         <div className="flex items-center gap-2">
             <FranchiseFlowLogo className="size-8 text-primary" />
-            <span className="font-headline text-lg font-semibold">Franchise Flow</span>
+            <span className="font-headline text-lg font-semibold">Franchisee Acquisation Management</span>
         </div>
       </SidebarHeader>
       <SidebarContent>
