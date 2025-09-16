@@ -6,6 +6,7 @@ import { LeadProvider } from '@/hooks/use-leads';
 import { UserProvider } from '@/hooks/use-users';
 import { CampaignProvider } from '@/hooks/use-campaigns';
 import { AvailabilityProvider } from '@/hooks/use-availability';
+import { AppointmentProvider } from '@/hooks/use-appointments';
 
 
 export const metadata: Metadata = {
@@ -29,11 +30,13 @@ export default function RootLayout({
         <UserProvider>
           <CampaignProvider>
             <LeadProvider>
+              <AppointmentProvider>
                 <AvailabilityProvider>
                     <AuthProvider>
                         {children}
                     </AuthProvider>
                 </AvailabilityProvider>
+              </AppointmentProvider>
             </LeadProvider>
           </CampaignProvider>
         </UserProvider>

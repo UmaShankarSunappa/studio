@@ -3,7 +3,7 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
-import { LogOut, User as UserIcon, Grip, LayoutGrid, Users, Megaphone, Calendar } from "lucide-react";
+import { LogOut, User as UserIcon, Grip, LayoutGrid, Users, Megaphone, Calendar, CalendarCheck } from "lucide-react";
 
 import {
   SidebarHeader,
@@ -78,6 +78,16 @@ export function AppSidebar() {
                   </SidebarMenuButton>
                 </Link>
               </SidebarMenuItem>
+               {currentUser?.role === 'Evaluator' && (
+                 <SidebarMenuItem>
+                    <Link href="/appointments">
+                      <SidebarMenuButton tooltip="Appointments" isActive={isActive('/appointments')}>
+                        <CalendarCheck />
+                        <span>Appointments</span>
+                      </SidebarMenuButton>
+                    </Link>
+                  </SidebarMenuItem>
+               )}
               {currentUser?.role === 'Admin' && (
                 <>
                   <SidebarMenuItem>
