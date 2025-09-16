@@ -544,7 +544,7 @@ export default function LeadsPage() {
                                             <Phone className="mr-2 h-4 w-4" /> Call
                                         </Button>
                                         <Button size="icon" variant="outline" onClick={(e) => { e.stopPropagation(); handleWhatsAppClick(lead); }}>
-                                            <WhatsAppIcon className="h-4 w-4 text-green-600" />
+                                            <WhatsAppIcon className="h-5 w-5 text-green-600" />
                                             <span className="sr-only">WhatsApp</span>
                                         </Button>
                                     </div>
