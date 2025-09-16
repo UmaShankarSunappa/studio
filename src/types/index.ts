@@ -4,7 +4,6 @@ export type LeadSource = "Newspaper" | "YouTube" | "Field Marketing" | "Website"
 
 export type LeadStatus =
   | "New"
-  | "Form-2 Pending"
   | "Form-2 No Response"
   | "Form-2 Submitted"
   | "In Discussion"

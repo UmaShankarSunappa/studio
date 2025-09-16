@@ -52,7 +52,6 @@ import { WhatsAppIcon } from "@/components/icons";
 
 const statusColors: Record<LeadStatus, string> = {
   "New": "bg-blue-100 text-blue-800",
-  "Form-2 Pending": "bg-yellow-100 text-yellow-800",
   "Form-2 No Response": "bg-orange-100 text-orange-800",
   "Form-2 Submitted": "bg-indigo-100 text-indigo-800",
   "In Discussion": "bg-sky-100 text-sky-800",

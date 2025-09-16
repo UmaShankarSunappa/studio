@@ -2,21 +2,20 @@
 import type { User, Lead, LeadSource, LeadStatus, Note, UserRole, UserState, InterestType } from '@/types';
 
 export const allUsers: User[] = [
-  { id: 'user-1', name: 'Admin User', avatar: 'https://i.pravatar.cc/150?u=user-1', role: 'Admin', state: 'All' },
-  { id: 'user-2', name: 'Telangana Manager', avatar: 'https://i.pravatar.cc/150?u=user-2', role: 'Manager', state: 'Telangana' },
-  { id: 'user-3', name: 'Tamil Nadu Manager', avatar: 'https://i.pravatar.cc/150?u=user-3', role: 'Manager', state: 'Tamil Nadu' },
-  { id: 'user-4', name: 'Suresh Reddy', avatar: 'https://i.pravatar.cc/150?u=user-4', role: 'Evaluator', state: 'Telangana' },
-  { id: 'user-5', name: 'Priya Mohan', avatar: 'https://i.pravatar.cc/150?u=user-5', role: 'Evaluator', state: 'Tamil Nadu' },
-  { id: 'user-6', name: 'Anil Kumar', avatar: 'https://i.pravatar.cc/150?u=user-6', role: 'Evaluator', state: 'Telangana' },
-  { id: 'user-7', name: 'Lakshmi Gupta', avatar: 'https://i.pravatar.cc/150?u=user-7', role: 'Evaluator', state: 'Telangana' },
-  { id: 'user-8', name: 'Rajesh Kannan', avatar: 'https://i.pravatar.cc/150?u=user-8', role: 'Evaluator', state: 'Tamil Nadu' },
-  { id: 'user-9', name: 'Deepa Iyer', avatar: 'https://i.pravatar.cc/150?u=user-9', role: 'Evaluator', state: 'Tamil Nadu' },
+  { id: 'user-1', name: 'Admin User', avatar: 'https://api.dicebear.com/8.x/lorelei/svg?seed=user-1', role: 'Admin', state: 'All' },
+  { id: 'user-2', name: 'Telangana Manager', avatar: 'https://api.dicebear.com/8.x/lorelei/svg?seed=user-2', role: 'Manager', state: 'Telangana' },
+  { id: 'user-3', name: 'Tamil Nadu Manager', avatar: 'https://api.dicebear.com/8.x/lorelei/svg?seed=user-3', role: 'Manager', state: 'Tamil Nadu' },
+  { id: 'user-4', name: 'Suresh Reddy', avatar: 'https://api.dicebear.com/8.x/lorelei/svg?seed=user-4', role: 'Evaluator', state: 'Telangana' },
+  { id: 'user-5', name: 'Priya Mohan', avatar: 'https://api.dicebear.com/8.x/lorelei/svg?seed=user-5', role: 'Evaluator', state: 'Tamil Nadu' },
+  { id: 'user-6', name: 'Anil Kumar', avatar: 'https://api.dicebear.com/8.x/lorelei/svg?seed=user-6', role: 'Evaluator', state: 'Telangana' },
+  { id: 'user-7', name: 'Lakshmi Gupta', avatar: 'https://api.dicebear.com/8.x/lorelei/svg?seed=user-7', role: 'Evaluator', state: 'Telangana' },
+  { id: 'user-8', name: 'Rajesh Kannan', avatar: 'https://api.dicebear.com/8.x/lorelei/svg?seed=user-8', role: 'Evaluator', state: 'Tamil Nadu' },
+  { id: 'user-9', name: 'Deepa Iyer', avatar: 'https://api.dicebear.com/8.x/lorelei/svg?seed=user-9', role: 'Evaluator', state: 'Tamil Nadu' },
 ];
 
 
 export const leadStatuses: LeadStatus[] = [
     "New",
-    "Form-2 Pending",
     "Form-2 No Response",
     "Form-2 Submitted",
     "In Discussion",
