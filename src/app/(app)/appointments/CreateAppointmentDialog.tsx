@@ -20,9 +20,12 @@ import type { Lead, Appointment, DailyAvailability } from "@/types";
 import { useAppointments } from "@/hooks/use-appointments";
 import { useAvailability } from "@/hooks/use-availability";
 
+type DayHalf = "First Half" | "Second Half";
+
 const appointmentFormSchema = z.object({
   leadId: z.string({ required_error: "Please select a lead." }),
   date: z.date({ required_error: "Please select a date." }),
+  dayHalf: z.enum(["First Half", "Second Half"], { required_error: "Please select a part of the day."}),
   slot: z.date({ required_error: "Please select a time slot." }),
   notes: z.string().optional(),
 });
@@ -46,9 +49,10 @@ export function CreateAppointmentDialog({ isOpen, onOpenChange, onCreateAppointm
   });
 
   const selectedDate = form.watch("date");
+  const selectedHalf = form.watch("dayHalf");
 
   const generateTimeSlots = React.useCallback(() => {
-    if (!selectedDate) return [];
+    if (!selectedDate || !selectedHalf) return [];
     
     const dateKey = format(startOfDay(selectedDate), "yyyy-MM-dd");
     const dayAvailability: DailyAvailability = availability[evaluatorId]?.[dateKey] || { firstHalf: "Not Set", secondHalf: "Not Set" };
@@ -60,7 +64,7 @@ export function CreateAppointmentDialog({ isOpen, onOpenChange, onCreateAppointm
         dayAvailability[half] === 'Calling' || dayAvailability[half] === 'Field Work';
 
     // First Half: 10:00 AM - 1:00 PM
-    if (isAvailableInHalf("firstHalf")) {
+    if (selectedHalf === "First Half" && isAvailableInHalf("firstHalf")) {
         let currentTime = set(selectedDate, { hours: 10, minutes: 0, seconds: 0, milliseconds: 0 });
         const endTime = set(selectedDate, { hours: 13, minutes: 0, seconds: 0, milliseconds: 0 });
         while (isBefore(currentTime, endTime)) {
@@ -72,7 +76,7 @@ export function CreateAppointmentDialog({ isOpen, onOpenChange, onCreateAppointm
     }
 
     // Second Half: 2:30 PM - 6:30 PM
-    if (isAvailableInHalf("secondHalf")) {
+    if (selectedHalf === "Second Half" && isAvailableInHalf("secondHalf")) {
         let currentTime = set(selectedDate, { hours: 14, minutes: 30, seconds: 0, milliseconds: 0 });
         const endTime = set(selectedDate, { hours: 18, minutes: 30, seconds: 0, milliseconds: 0 });
         while (isBefore(currentTime, endTime)) {
@@ -88,9 +92,27 @@ export function CreateAppointmentDialog({ isOpen, onOpenChange, onCreateAppointm
         .map(app => new Date(app.date).getTime());
 
     return slots.filter(slot => !bookedSlots.includes(slot.getTime()));
-  }, [selectedDate, appointments, availability, evaluatorId]);
+  }, [selectedDate, selectedHalf, appointments, availability, evaluatorId]);
   
   const timeSlots = generateTimeSlots();
+  
+  const dayHalves: { value: DayHalf; label: string; disabled: boolean }[] = React.useMemo(() => {
+    if (!selectedDate) return [
+        { value: "First Half", label: "First Half (10:00 AM - 1:00 PM)", disabled: true },
+        { value: "Second Half", label: "Second Half (2:30 PM - 6:30 PM)", disabled: true }
+    ];
+    
+    const dateKey = format(startOfDay(selectedDate), "yyyy-MM-dd");
+    const dayAvailability = availability[evaluatorId]?.[dateKey];
+    
+    const isAvailable = (half: "firstHalf" | "secondHalf") => dayAvailability && (dayAvailability[half] === 'Calling' || dayAvailability[half] === 'Field Work');
+
+    return [
+      { value: "First Half", label: "First Half (10:00 AM - 1:00 PM)", disabled: !isAvailable("firstHalf") },
+      { value: "Second Half", label: "Second Half (2:30 PM - 6:30 PM)", disabled: !isAvailable("secondHalf") }
+    ];
+  }, [selectedDate, availability, evaluatorId]);
+
 
   const onSubmit = (data: AppointmentFormValues) => {
     onCreateAppointment({
@@ -168,6 +190,7 @@ export function CreateAppointmentDialog({ isOpen, onOpenChange, onCreateAppointm
                           onSelect={(date) => {
                               field.onChange(date);
                               form.resetField("slot");
+                              form.resetField("dayHalf");
                           }}
                           disabled={isDateDisabled}
                           initialFocus
@@ -178,34 +201,72 @@ export function CreateAppointmentDialog({ isOpen, onOpenChange, onCreateAppointm
                   </FormItem>
                 )}
               />
-              <Controller
-                control={form.control}
-                name="slot"
-                render={({ field }) => (
+               <FormField
+                  control={form.control}
+                  name="dayHalf"
+                  render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Time Slot</FormLabel>
+                    <FormLabel>Part of Day</FormLabel>
                     <Select
-                      onValueChange={(value) => field.onChange(new Date(value))}
-                      disabled={!selectedDate || timeSlots.length === 0}
+                      onValueChange={(value) => {
+                          field.onChange(value)
+                          form.resetField("slot");
+                      }}
+                      value={field.value}
+                      disabled={!selectedDate}
                     >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select a slot" />
+                          <SelectValue placeholder="Select a half" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {timeSlots.map((slot, i) => (
-                          <SelectItem key={i} value={slot.toISOString()}>
-                            {format(slot, "h:mm a")}
-                          </SelectItem>
+                        {dayHalves.map(half => (
+                             <SelectItem key={half.value} value={half.value} disabled={half.disabled}>
+                                {half.label}
+                            </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                     <FormMessage />
                   </FormItem>
-                )}
-              />
+                  )}
+                />
             </div>
+            <FormField
+              control={form.control}
+              name="slot"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Time Slot</FormLabel>
+                  <Select
+                    onValueChange={(value) => field.onChange(new Date(value))}
+                    value={field.value?.toISOString()}
+                    disabled={!selectedDate || !selectedHalf || timeSlots.length === 0}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select an available slot" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {timeSlots.length > 0 ? (
+                        timeSlots.map((slot, i) => (
+                            <SelectItem key={i} value={slot.toISOString()}>
+                                {format(slot, "h:mm a")}
+                            </SelectItem>
+                        ))
+                      ) : (
+                        <SelectItem value="no-slots" disabled>
+                          No slots available
+                        </SelectItem>
+                      )}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
              <FormField
               control={form.control}
               name="notes"
