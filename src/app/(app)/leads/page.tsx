@@ -46,6 +46,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { MultiSelect } from "@/components/ui/multi-select";
 import { Checkbox } from "@/components/ui/checkbox";
+import { WhatsAppIcon } from "@/components/icons";
 
 const statusColors: Record<LeadStatus, string> = {
   "New": "bg-blue-100 text-blue-800",
@@ -243,6 +244,10 @@ export default function LeadsPage() {
   const handleCallClick = (lead: Lead) => {
     setLeadToCall(lead);
     setIsCallDialogOpen(true);
+  };
+  
+  const handleWhatsAppClick = (lead: Lead) => {
+    window.open(`https://wa.me/91${lead.phone}`, '_blank');
   };
 
   const handleEndCall = (leadId: string, duration: number, callStatus: CallStatus) => {
@@ -534,9 +539,15 @@ export default function LeadsPage() {
                         {currentUser.role === 'Evaluator' && (
                             <td className="p-4 text-center">
                                 {lead.assignedUser?.id === currentUser.id && (
-                                    <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); handleCallClick(lead); }}>
-                                        <Phone className="mr-2 h-4 w-4" /> Call
-                                    </Button>
+                                    <div className="flex items-center justify-center gap-2">
+                                        <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); handleCallClick(lead); }}>
+                                            <Phone className="mr-2 h-4 w-4" /> Call
+                                        </Button>
+                                        <Button size="icon" variant="outline" onClick={(e) => { e.stopPropagation(); handleWhatsAppClick(lead); }}>
+                                            <WhatsAppIcon className="h-4 w-4 text-green-600" />
+                                            <span className="sr-only">WhatsApp</span>
+                                        </Button>
+                                    </div>
                                 )}
                             </td>
                         )}
