@@ -29,6 +29,42 @@ const initialCampaigns: Campaign[] = [
         to: new Date(new Date().setDate(new Date().getDate() + 30)),
       }
     },
+    { 
+      id: 'camp-3', 
+      name: 'facebook ad - madhapur', 
+      slug: 'facebook-ad-madhapur', 
+      createdAt: new Date('2024-05-10'), 
+      leadCount: 0,
+      state: 'Telangana',
+      period: {
+        from: new Date('2024-05-10'),
+        to: new Date('2024-07-10'),
+      }
+    },
+    { 
+      id: 'camp-4', 
+      name: 'facebook ad - amadhapur', 
+      slug: 'facebook-ad-amadhapur', 
+      createdAt: new Date('2024-06-01'), 
+      leadCount: 0,
+      state: 'Telangana',
+      period: {
+        from: new Date('2024-06-01'),
+        to: new Date('2024-08-01'),
+      }
+    },
+    { 
+      id: 'camp-5', 
+      name: 'youtube ad - medak', 
+      slug: 'youtube-ad-medak', 
+      createdAt: new Date('2024-04-20'), 
+      leadCount: 0,
+      state: 'Tamil Nadu',
+      period: {
+        from: new Date('2024-04-20'),
+        to: new Date('2024-06-20'),
+      }
+    },
 ];
 
 
@@ -46,6 +82,11 @@ export const CampaignProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     try {
+      // Force a reset to load the new data structure
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('allCampaigns');
+      }
+      
       const storedCampaigns = localStorage.getItem('allCampaigns');
       if (storedCampaigns) {
         const parsedCampaigns = JSON.parse(storedCampaigns).map((c: any) => ({
