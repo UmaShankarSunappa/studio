@@ -11,6 +11,7 @@ export const allUsers: User[] = [
   { id: 'user-7', name: 'Lakshmi Gupta', avatar: 'https://api.dicebear.com/8.x/lorelei/svg?seed=user-7', role: 'Evaluator', state: 'Telangana' },
   { id: 'user-8', name: 'Rajesh Kannan', avatar: 'https://api.dicebear.com/8.x/lorelei/svg?seed=user-8', role: 'Evaluator', state: 'Tamil Nadu' },
   { id: 'user-9', name: 'Deepa Iyer', avatar: 'https://api.dicebear.com/8.x/lorelei/svg?seed=user-9', role: 'Evaluator', state: 'Tamil Nadu' },
+  { id: 'user-10', name: 'Marketing User', avatar: 'https://api.dicebear.com/8.x/lorelei/svg?seed=user-10', role: 'Marketing', state: 'All' },
 ];
 
 

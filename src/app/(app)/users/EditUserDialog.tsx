@@ -34,14 +34,21 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-const userRoles: UserRole[] = ["Manager", "Evaluator"];
+const userRoles: Exclude<UserRole, "Admin">[] = ["Manager", "Evaluator", "Marketing"];
 const userStates: Exclude<UserState, "All">[] = ["Telangana", "Tamil Nadu"];
 
 const userFormSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters."),
-  role: z.enum(["Manager", "Evaluator"]),
-  state: z.enum(["Telangana", "Tamil Nadu"]),
+  role: z.enum(["Manager", "Evaluator", "Marketing"]),
+  state: z.string(),
+}).refine(data => {
+    if (data.role === 'Marketing') return true;
+    return userStates.includes(data.state as any);
+}, {
+    message: "Please select a state for this role.",
+    path: ["state"],
 });
+
 
 type UserFormValues = z.infer<typeof userFormSchema>;
 
@@ -49,27 +56,40 @@ interface EditUserDialogProps {
   user: User | null;
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  onUpdateUser: (userId: string, data: Omit<User, 'id' | 'avatar' | 'role'> & { role: 'Manager' | 'Evaluator' }) => void;
+  onUpdateUser: (userId: string, data: Omit<User, 'id' | 'avatar'>) => void;
 }
 
 export function EditUserDialog({ user, isOpen, onOpenChange, onUpdateUser }: EditUserDialogProps) {
   const form = useForm<UserFormValues>({
     resolver: zodResolver(userFormSchema),
   });
+  
+  const selectedRole = form.watch("role");
 
   React.useEffect(() => {
     if (user) {
       form.reset({
         name: user.name,
-        role: user.role as "Manager" | "Evaluator",
-        state: user.state as "Telangana" | "Tamil Nadu",
+        role: user.role as "Manager" | "Evaluator" | "Marketing",
+        state: user.state,
       });
     }
   }, [user, form, isOpen]);
+  
+   React.useEffect(() => {
+    if (selectedRole === "Marketing") {
+      form.setValue("state", "All");
+    } else {
+        if (form.getValues("state") === "All") {
+             form.setValue("state", "" as any);
+        }
+    }
+  }, [selectedRole, form]);
+
 
   const onSubmit = (data: UserFormValues) => {
     if (user) {
-      onUpdateUser(user.id, data);
+      onUpdateUser(user.id, data as Omit<User, 'id' | 'avatar'>);
       onOpenChange(false);
     }
   };
@@ -122,28 +142,30 @@ export function EditUserDialog({ user, isOpen, onOpenChange, onUpdateUser }: Edi
                     </FormItem>
                 )}
             />
-            <FormField
-                control={form.control}
-                name="state"
-                render={({ field }) => (
-                    <FormItem>
-                    <FormLabel>State</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                        <SelectTrigger>
-                            <SelectValue placeholder="Select a state" />
-                        </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                        {userStates.map(state => (
-                            <SelectItem key={state} value={state}>{state}</SelectItem>
-                        ))}
-                        </SelectContent>
-                    </Select>
-                    <FormMessage />
-                    </FormItem>
-                )}
-            />
+            {selectedRole !== 'Marketing' && (
+                <FormField
+                    control={form.control}
+                    name="state"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>State</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Select a state" />
+                            </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                            {userStates.map(state => (
+                                <SelectItem key={state} value={state}>{state}</SelectItem>
+                            ))}
+                            </SelectContent>
+                        </Select>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                />
+            )}
             <DialogFooter className="pt-4">
               <DialogClose asChild>
                 <Button type="button" variant="outline">

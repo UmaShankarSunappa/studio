@@ -54,42 +54,57 @@ export function AppSidebar() {
             </>
           ) : (
             <>
-              <SidebarMenuItem>
-                <Link href="/leads">
-                  <SidebarMenuButton tooltip="Leads" isActive={isActive('/leads')} >
-                    <Grip />
-                    <span>Leads</span>
-                  </SidebarMenuButton>
-                </Link>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <Link href="/dashboard">
-                  <SidebarMenuButton tooltip="Dashboard" isActive={isActive('/dashboard')}>
-                    <LayoutGrid />
-                    <span>Dashboard</span>
-                  </SidebarMenuButton>
-                </Link>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <Link href="/availability">
-                  <SidebarMenuButton tooltip="My Availability" isActive={isActive('/availability')}>
-                    <Calendar />
-                    <span>My Availability</span>
-                  </SidebarMenuButton>
-                </Link>
-              </SidebarMenuItem>
-               {currentUser?.role === 'Evaluator' && (
-                 <SidebarMenuItem>
-                    <Link href="/appointments">
-                      <SidebarMenuButton tooltip="Appointments" isActive={isActive('/appointments')}>
-                        <CalendarCheck />
-                        <span>Appointments</span>
+              {currentUser?.role !== 'Marketing' && (
+                <>
+                  <SidebarMenuItem>
+                    <Link href="/leads">
+                      <SidebarMenuButton tooltip="Leads" isActive={isActive('/leads')} >
+                        <Grip />
+                        <span>Leads</span>
                       </SidebarMenuButton>
                     </Link>
                   </SidebarMenuItem>
-               )}
+                  <SidebarMenuItem>
+                    <Link href="/dashboard">
+                      <SidebarMenuButton tooltip="Dashboard" isActive={isActive('/dashboard')}>
+                        <LayoutGrid />
+                        <span>Dashboard</span>
+                      </SidebarMenuButton>
+                    </Link>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <Link href="/availability">
+                      <SidebarMenuButton tooltip="My Availability" isActive={isActive('/availability')}>
+                        <Calendar />
+                        <span>My Availability</span>
+                      </SidebarMenuButton>
+                    </Link>
+                  </SidebarMenuItem>
+                  {currentUser?.role === 'Evaluator' && (
+                    <SidebarMenuItem>
+                        <Link href="/appointments">
+                          <SidebarMenuButton tooltip="Appointments" isActive={isActive('/appointments')}>
+                            <CalendarCheck />
+                            <span>Appointments</span>
+                          </SidebarMenuButton>
+                        </Link>
+                      </SidebarMenuItem>
+                  )}
+                </>
+              )}
+
+              {(currentUser?.role === 'Admin' || currentUser?.role === 'Marketing') && (
+                 <SidebarMenuItem>
+                    <Link href="/campaigns">
+                      <SidebarMenuButton tooltip="Campaigns" isActive={isActive('/campaigns')}>
+                        <Megaphone />
+                        <span>Campaigns</span>
+                      </SidebarMenuButton>
+                    </Link>
+                  </SidebarMenuItem>
+              )}
+
               {currentUser?.role === 'Admin' && (
-                <>
                   <SidebarMenuItem>
                     <Link href="/users">
                       <SidebarMenuButton tooltip="Users" isActive={isActive('/users')}>
@@ -98,15 +113,6 @@ export function AppSidebar() {
                       </SidebarMenuButton>
                     </Link>
                   </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <Link href="/campaigns">
-                      <SidebarMenuButton tooltip="Campaigns" isActive={isActive('/campaigns')}>
-                        <Megaphone />
-                        <span>Campaigns</span>
-                      </SidebarMenuButton>
-                    </Link>
-                  </SidebarMenuItem>
-                </>
               )}
             </>
           )}

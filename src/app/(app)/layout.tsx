@@ -15,6 +15,8 @@ function ClientAppLayout({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!loading && !user) {
       router.push("/login");
+    } else if (!loading && user?.role === 'Marketing') {
+        router.push("/campaigns");
     }
   }, [user, loading, router]);
 

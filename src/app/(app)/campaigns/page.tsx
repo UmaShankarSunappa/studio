@@ -41,7 +41,7 @@ export default function CampaignsPage() {
   const qrCodeRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
-    if (!authLoading && currentUser?.role !== 'Admin') {
+    if (!authLoading && currentUser?.role !== 'Admin' && currentUser?.role !== 'Marketing') {
       router.push('/leads');
     }
   }, [currentUser, authLoading, router]);
@@ -113,7 +113,7 @@ export default function CampaignsPage() {
 
   const loading = authLoading || campaignsLoading;
 
-  if (loading || currentUser?.role !== 'Admin') {
+  if (loading || (currentUser?.role !== 'Admin' && currentUser?.role !== 'Marketing')) {
     return (
       <div className="flex h-[80vh] items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin" />

@@ -12,7 +12,7 @@ export type LeadStatus =
   | "Not Interested"
   | "Not Qualified";
 
-export type UserRole = "Admin" | "Manager" | "Evaluator";
+export type UserRole = "Admin" | "Manager" | "Evaluator" | "Marketing";
 export type UserState = "Telangana" | "Tamil Nadu" | "All";
 
 export type User = {
