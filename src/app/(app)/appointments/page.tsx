@@ -92,8 +92,8 @@ export default function AppointmentsPage() {
     });
   }, [appointments, currentUser, selectedDate]);
 
-  const firstHalfAppointments = todaysAppointments.filter(app => new Date(app.date).getHours() < 13);
-  const secondHalfAppointments = todaysAppointments.filter(app => new Date(app.date).getHours() >= 13);
+  const firstHalfAppointments = todaysAppointments.filter(app => new Date(app.date).getHours() < 14);
+  const secondHalfAppointments = todaysAppointments.filter(app => new Date(app.date).getHours() >= 14);
   
   const getLeadName = (leadId: string) => {
     return leads.find(l => l.id === leadId)?.name || "Unknown Lead";
@@ -129,12 +129,16 @@ export default function AppointmentsPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="md:col-span-1">
-                 <Calendar
-                    mode="single"
-                    selected={selectedDate}
-                    onSelect={setSelectedDate}
-                    className="rounded-md border"
-                />
+                 <Card>
+                    <CardContent className="p-0">
+                        <Calendar
+                            mode="single"
+                            selected={selectedDate}
+                            onSelect={setSelectedDate}
+                            className="w-full"
+                        />
+                    </CardContent>
+                 </Card>
             </div>
             <div className="md:col-span-2">
               <Card>
