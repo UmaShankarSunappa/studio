@@ -247,11 +247,15 @@ export function CreateAppointmentDialog({ isOpen, onOpenChange, onCreateAppointm
                     </FormControl>
                     <SelectContent>
                         {availableSlots.length > 0 ? (
-                        availableSlots.map(slot => (
-                            <SelectItem key={slot.toISOString()} value={format(slot, "h:mm a")}>
-                            {format(slot, "h:mm a")}
-                            </SelectItem>
-                        ))
+                        availableSlots.map(slot => {
+                            const slotEnd = addMinutes(slot, 20);
+                            const slotLabel = `${format(slot, "h:mm a")} - ${format(slotEnd, "h:mm a")}`;
+                            return (
+                                <SelectItem key={slot.toISOString()} value={format(slot, "h:mm a")}>
+                                {slotLabel}
+                                </SelectItem>
+                            )
+                        })
                         ) : (
                         <SelectItem value="no-slots" disabled>
                             No available slots
@@ -288,3 +292,5 @@ export function CreateAppointmentDialog({ isOpen, onOpenChange, onCreateAppointm
     </Dialog>
   );
 }
+
+    
